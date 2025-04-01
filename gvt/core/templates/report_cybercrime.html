@@ -1,0 +1,914 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malawi Cybersecurity Reporting Portal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom Properties for Light/Dark Mode */
+        :root {
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #1a56db;
+            --primary-hover: #1e429f;
+            --secondary-color: #e2e8f0;
+            --border-color: #e5e7eb;
+            --accent-color: #3b82f6;
+            --footer-bg: #1e40af;
+            --footer-text: #ffffff;
+            --emergency-bg: #dc2626;
+            --emergency-text: #ffffff;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --neutral-accent: #f3f4f6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --background-color: #111827;
+            --card-bg: #1f2937;
+            --text-color: #e5e7eb;
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+            --secondary-color: #374151;
+            --border-color: #4b5563;
+            --accent-color: #60a5fa;
+            --footer-bg: #111827;
+            --footer-text: #e5e7eb;
+            --emergency-bg: #b91c1c;
+            --emergency-text: #ffffff;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --neutral-accent: #374151;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Emergency Bar */
+        .emergency-bar {
+            background-color: var(--emergency-bg);
+            color: var(--emergency-text);
+            padding: 10px 0;
+        }
+
+        .emergency-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .emergency-contact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .emergency-contact a {
+            color: var(--emergency-text);
+            text-decoration: underline;
+        }
+
+        .emergency-contact a:hover {
+            text-decoration: none;
+        }
+
+        .emergency-info {
+            display: flex;
+            gap: 16px;
+        }
+
+        .hotline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            padding: 16px 0;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+          
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .logo img {
+            width: 48px;
+        }
+
+        .site-title h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-hover);
+        }
+
+        .login-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: var(--primary-hover);
+            color: white;
+        }
+
+        /* Page Title */
+        .page-title {
+            background-color: var(--neutral-accent);
+            border-bottom: 1px solid var(--border-color);
+            padding: 24px 0;
+        }
+
+        .page-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-title p {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* Main Content */
+        main {
+            padding: 32px 0;
+        }
+        @font-face {
+            font-family: 'Troy';
+            src: url('{% static 'troy.woff2' %}') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        /* Apply the font to specific elements */
+        body {
+            font-family: 'Troy', sans-serif;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        /* Form Styles */
+        .form-content {
+            padding: 24px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--text-color);
+        }
+
+        .required::after {
+            content: "*";
+            color: var(--emergency-bg);
+            margin-left: 2px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            outline: none;
+        }
+
+        textarea.form-control {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .notice {
+            background-color: var(--neutral-accent);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .dropzone:hover {
+            background-color: var(--neutral-accent);
+            border-color: var(--primary-color);
+        }
+
+        .dropzone-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .dropzone-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .dropzone-text {
+            font-size: 0.875rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .file-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .file-item {
+            background-color: var(--neutral-accent);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-input {
+            margin-top: 3px;
+            margin-right: 10px;
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            color: var(--text-color);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            background-color: var(--neutral-accent);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 32px 0 16px;
+            margin-top: 48px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        .footer-section h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .footer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 32px;
+            padding-top: 24px;
+        }
+
+        .copyright {
+            text-align: center;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .header-container {
+                flex-direction: row;
+            }
+
+            .logo-section {
+                margin-bottom: 0;
+            }
+
+            .navigation {
+                flex-direction: row;
+                gap: 24px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid-3 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .emergency-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .emergency-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .support-info {
+                display: none;
+            }
+        }
+
+        /* Dark/Light Mode Toggle Animation */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .rotate-animation {
+            animation: rotate 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Emergency Bar -->
+    <div class="emergency-bar">
+        <div class="container emergency-container">
+            <div class="emergency-contact hotline">
+                <i class="fas fa-phone-alt animate-pulse"></i>
+                <span>Emergency Hotline:</span>
+                <a href="tel:+2651000" style="text-decoration: none;">+265 98877272</a>
+            </div>
+            <div class="emergency-info">
+                <div class="emergency-contact">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:report@malawicyber.gov.mw" style="text-decoration: none;">report@malawicyber.gov.mw</a>
+                </div>
+                <div class="emergency-contact support-info">
+                    <i class="fas fa-clock"></i>
+                    <span>24/7 Support Available</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header with Logo -->
+    <header>
+        <div class="container header-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="{% static 'mw.png' %}" alt="Malawi Cybersecurity Logo">
+                </div>
+                <div class="site-title">
+                    <h1>Public Reporting Portal</h1>
+                </div>
+            </div>
+            <div class="navigation">
+                <div class="nav-links">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-book"></i> Resources
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-question-circle"></i> Help
+                    </a>
+                </div>
+                <a href="#" class="login-btn">
+                    <i class="fas fa-user-shield"></i> Login
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Title -->
+    <div class="page-title">
+        <div class="container">
+            <h2><i class="fas fa-clipboard-list"></i> Report a Cybersecurity Incident</h2>
+            <p>Your information will help protect Malawi's digital infrastructure</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="card">
+                <form id="report-form">
+                    <!-- Form content -->
+                    <div class="form-content">
+                        <!-- Incident Details Section -->
+                        <div class="form-section">
+                            <h3 class="section-header">
+                                <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i>
+                                Incident Details
+                            </h3>
+                            
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="crime_type" class="form-label required">Type of Incident</label>
+                                    <select id="crime_type" name="crime_type" class="form-control" required>
+                                        <option value="">Select incident type...</option>
+                                        <option value="phishing">Phishing Attack</option>
+                                        <option value="malware">Malware Infection</option>
+                                        <option value="ddos">DDoS Attack</option>
+                                        <option value="data_breach">Data Breach</option>
+                                        <option value="ransomware">Ransomware</option>
+                                        <option value="unauthorized_access">Unauthorized Access</option>
+                                        <option value="identity_theft">Identity Theft</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="incident_date" class="form-label required">Incident Date & Time</label>
+                                    <input type="datetime-local" id="incident_date" name="incident_date" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description" class="form-label required">Description</label>
+                                <textarea id="description" name="description" class="form-control" required></textarea>
+                                <p class="help-text">Please describe the incident in detail, including how it was discovered and potential impact.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Information Section -->
+                        <div class="form-section">
+                            <h3 class="section-header">
+                                <i class="fas fa-user" style="color: var(--primary-color);"></i>
+                                Contact Information
+                            </h3>
+                            
+                            <div class="notice">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Providing contact information is optional. Reports can be submitted anonymously.</span>
+                            </div>
+                            
+                            <div class="form-grid form-grid-3">
+                                <div class="form-group">
+                                    <label for="reporter_name" class="form-label">Your Name</label>
+                                    <input type="text" id="reporter_name" name="reporter_name" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="reporter_email" class="form-label">Email Address</label>
+                                    <input type="email" id="reporter_email" name="reporter_email" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="reporter_phone" class="form-label">Phone Number</label>
+                                    <input type="tel" id="reporter_phone" name="reporter_phone" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="additional_info" class="form-label">Additional Information</label>
+                                <textarea id="additional_info" name="additional_info" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Evidence Upload Section -->
+                        <div class="form-section">
+                            <h3 class="section-header">
+                                <i class="fas fa-paperclip" style="color: var(--success-color);"></i>
+                                Evidence Upload
+                            </h3>
+                            
+                            <div class="dropzone" id="dropzone">
+                                <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
+                                <p class="dropzone-title">Drop files here or click to select</p>
+                                <p class="dropzone-text">Supports images, documents, logs (Max: 10MB per file)</p>
+                                <input type="file" id="evidence_files" name="evidence_files" multiple style="display: none;">
+                            </div>
+                            
+                            <div id="file-preview" class="file-preview"></div>
+                        </div>
+                        
+                        <!-- Verification Section -->
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agree-terms" name="agree-terms" required class="checkbox-input">
+                            <label for="agree-terms" class="checkbox-label">
+                                I confirm all information provided is accurate to the best of my knowledge
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Submit Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>About MCSIRT</h4>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
+                        Malawi Computer Security Incident Response Team (MCSIRT) coordinates cybersecurity incident response across Malawi.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-list">
+                        <li><a href="#" class="footer-link"><i class="fas fa-angle-right"></i> Security Advisories</a></li>
+                        <li><a href="#" class="footer-link"><i class="fas fa-angle-right"></i> Best Practices</a></li>
+                        <li><a href="#" class="footer-link"><i class="fas fa-angle-right"></i> Training Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Us</h4>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Capital City, Lilongwe, Malawi</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+265 1 773 799</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@malawicyber.gov.mw</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-divider">
+                <div class="copyright">
+                    &copy; 2025 Malawi Cybersecurity Authority. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun" id="theme-icon"></i>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+        
+        // Check for saved theme preference or use user's system preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            htmlElement.setAttribute('data-theme', 'dark');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+        
+        // Toggle theme when button is clicked
+        themeToggle.addEventListener('click', () => {
+            themeIcon.classList.add('rotate-animation');
+            
+            setTimeout(() => {
+                const currentTheme = htmlElement.getAttribute('data-theme');
+                
+                if (currentTheme === 'dark') {
+                    htmlElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    htmlElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+                
+                themeIcon.classList.remove('rotate-animation');
+            }, 250);
+        });
+        
+        // Dropzone functionality
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('evidence_files');
+        const filePreview = document.getElementById('file-preview');
+        
+        // Handle click to trigger file input
+        dropzone.addEventListener('click', () => fileInput.click());
+        
+        // Drag-and-drop events
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.style.backgroundColor = 'var(--neutral-accent)';
+            dropzone.style.borderColor = 'var(--primary-color)';
+        });
+        
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.style.backgroundColor = '';
+            dropzone.style.borderColor = '';
+        });
+        
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.style.backgroundColor = '';
+            dropzone.style.borderColor = '';
+            fileInput.files = e.dataTransfer.files;
+            updateFilePreview();
+        });
+        
+        // Update preview when files are selected via input
+        fileInput.addEventListener('change', updateFilePreview);
+        
+        function updateFilePreview() {
+            filePreview.innerHTML = '';
+            const files = fileInput.files;
+            if (files.length === 0) return;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                // Icon based on file type
+                const icon = document.createElement('i');
+                
+                if (file.type.startsWith('image/')) {
+                    icon.className = 'fas fa-file-image';
+                    icon.style.color = 'var(--success-color)';
+                } else if (file.type.includes('pdf')) {
+                    icon.className = 'fas fa-file-pdf';
+                    icon.style.color = 'var(--emergency-bg)';
+                } else if (file.type.includes('word') || file.type.includes('document')) {
+                    icon.className = 'fas fa-file-word';
+                    icon.style.color = 'var(--primary-color)';
+                } else if (file.type.includes('excel') || file.type.includes('sheet')) {
+                    icon.className = 'fas fa-file-excel';
+                    icon.style.color = 'var(--success-color)';
+                } else {
+                    icon.className = 'fas fa-file';
+                    icon.style.color = 'var(--text-color)';
+                }
+                
+                fileItem.appendChild(icon);
+                
+                const fileText = document.createElement('span');
+                fileText.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                fileItem.appendChild(fileText);
+                
+                filePreview.appendChild(fileItem);
+            }
+        }
+    </script>
+</body>
+</html>
