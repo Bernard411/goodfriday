@@ -155,6 +155,7 @@
         .logo {
             width: 60px;
             height: 60px;
+          
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -236,18 +237,18 @@
         main {
             padding: 32px 0;
         }
-
         @font-face {
             font-family: 'Troy';
             src: url('{% static 'troy.woff2' %}') format('woff2');
             font-weight: normal;
             font-style: normal;
         }
-
+        
+        /* Apply the font to specific elements */
         body {
             font-family: 'Troy', sans-serif;
         }
-
+        
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
@@ -640,8 +641,8 @@
     <main>
         <div class="container">
             <div class="card">
-                <form id="report-form" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
+                <form id="report-form">
+                    <!-- Form content -->
                     <div class="form-content">
                         <!-- Incident Details Section -->
                         <div class="form-section">
@@ -652,30 +653,30 @@
                             
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="{{ form.crime_type.id_for_label }}" class="form-label required">Type of Incident</label>
-                                    {{ form.crime_type }}
-                                    {% if form.crime_type.errors %}
-                                        <p class="help-text" style="color: var(--emergency-bg);">{{ form.crime_type.errors }}</p>
-                                    {% endif %}
+                                    <label for="crime_type" class="form-label required">Type of Incident</label>
+                                    <select id="crime_type" name="crime_type" class="form-control" required>
+                                        <option value="">Select incident type...</option>
+                                        <option value="phishing">Phishing Attack</option>
+                                        <option value="malware">Malware Infection</option>
+                                        <option value="ddos">DDoS Attack</option>
+                                        <option value="data_breach">Data Breach</option>
+                                        <option value="ransomware">Ransomware</option>
+                                        <option value="unauthorized_access">Unauthorized Access</option>
+                                        <option value="identity_theft">Identity Theft</option>
+                                        <option value="other">Other</option>
+                                    </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="{{ form.incident_date.id_for_label }}" class="form-label required">Incident Date & Time</label>
-                                    {{ form.incident_date }}
-                                    {% if form.incident_date.errors %}
-                                        <p class="help-text" style="color: var(--emergency-bg);">{{ form.incident_date.errors }}</p>
-                                    {% endif %}
+                                    <label for="incident_date" class="form-label required">Incident Date & Time</label>
+                                    <input type="datetime-local" id="incident_date" name="incident_date" class="form-control" required>
                                 </div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="{{ form.description.id_for_label }}" class="form-label required">Description</label>
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                    <p class="help-text" style="color: var(--emergency-bg);">{{ form.description.errors }}</p>
-                                {% else %}
-                                    <p class="help-text">Please describe the incident in detail, including how it was discovered and potential impact.</p>
-                                {% endif %}
+                                <label for="description" class="form-label required">Description</label>
+                                <textarea id="description" name="description" class="form-control" required></textarea>
+                                <p class="help-text">Please describe the incident in detail, including how it was discovered and potential impact.</p>
                             </div>
                         </div>
                         
@@ -693,39 +694,26 @@
                             
                             <div class="form-grid form-grid-3">
                                 <div class="form-group">
-                                    <label for="{{ form.reporter_name.id_for_label }}" class="form-label">Your Name</label>
-                                    {{ form.reporter_name }}
-                                    {% if form.reporter_name.errors %}
-                                        <p class="help-text" style="color: var(--emergency-bg);">{{ form.reporter_name.errors }}</p>
-                                    {% endif %}
+                                    <label for="reporter_name" class="form-label">Your Name</label>
+                                    <input type="text" id="reporter_name" name="reporter_name" class="form-control">
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="{{ form.reporter_email.id_for_label }}" class="form-label">Email Address</label>
-                                    {{ form.reporter_email }}
-                                    {% if form.reporter_email.errors %}
-                                        <p class="help-text" style="color: var(--emergency-bg);">{{ form.reporter_email.errors }}</p>
-                                    {% endif %}
+                                    <label for="reporter_email" class="form-label">Email Address</label>
+                                    <input type="email" id="reporter_email" name="reporter_email" class="form-control">
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="{{ form.reporter_phone.id_for_label }}" class="form-label">Phone Number</label>
-                                    {{ form.reporter_phone }}
-                                    {% if form.reporter_phone.errors %}
-                                        <p class="help-text" style="color: var(--emergency-bg);">{{ form.reporter_phone.errors }}</p>
-                                    {% endif %}
+                                    <label for="reporter_phone" class="form-label">Phone Number</label>
+                                    <input type="tel" id="reporter_phone" name="reporter_phone" class="form-control">
                                 </div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="{{ form.additional_info.id_for_label }}" class="form-label">Additional Information</label>
-                                {{ form.additional_info }}
-                                {% if form.additional_info.errors %}
-                                    <p class="help-text" style="color: var(--emergency-bg);">{{ form.additional_info.errors }}</p>
-                                {% endif %}
+                                <label for="additional_info" class="form-label">Additional Information</label>
+                                <textarea id="additional_info" name="additional_info" class="form-control"></textarea>
                             </div>
                         </div>
-                        
                         
                         <!-- Evidence Upload Section -->
                         <div class="form-section">
@@ -801,7 +789,7 @@
             </div>
             <div class="footer-divider">
                 <div class="copyright">
-                    © 2025 Malawi Cybersecurity Authority. All rights reserved.
+                    &copy; 2025 Malawi Cybersecurity Authority. All rights reserved.
                 </div>
             </div>
         </div>

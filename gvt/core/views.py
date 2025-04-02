@@ -20,3 +20,27 @@ def report_cybercrime(request):
         form = CybercrimeReportForm()
 
     return render(request, 'report_cybercrime.html', {'form': form})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import CybercrimeReport, EvidenceFile
+from .forms import CybercrimeReportForm
+from django.contrib import messages
+
+
+def dashboard(request):
+    reports = CybercrimeReport.objects.all()
+    return render(request, 'dashboard.html', {'reports': reports})
+
+def delete_report(request, report_id):
+    report = get_object_or_404(CybercrimeReport, id=report_id)
+    if request.method == 'POST':
+        report.delete()
+        messages.success(request, 'Report deleted successfully!')
+        return redirect('dashboard')
+    return render(request, 'confirm_delete.html', {'report': report})
+
+def view_report_analysis(request, report_id):
+    report = get_object_or_404(CybercrimeReport, id=report_id)
+    evidence_files = report.evidence_files.all()
+    return render(request, 'report_analysis.html', {'report': report, 'evidence_files': evidence_files})

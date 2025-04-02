@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Delete - Malawi Cybersecurity</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reuse CSS from dashboard.html */
+        :root {
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #1a56db;
+            --primary-hover: #1e429f;
+            --emergency-bg: #dc2626;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-confirm {
+            background-color: var(--emergency-bg);
+        }
+
+        .btn-cancel {
+            background-color: var(--primary-color);
+        }
+
+        .btn-confirm:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-trash"></i> Confirm Deletion</h2>
+            <p>Are you sure you want to delete Report #{{ report.id }} - {{ report.get_crime_type_display }}?</p>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-confirm">
+                    <i class="fas fa-check"></i> Yes, Delete
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

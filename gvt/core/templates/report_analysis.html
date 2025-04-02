@@ -1,0 +1,678 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Analysis - Malawi Cybersecurity</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Light mode variables */
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #6c757d;
+            --primary-color: #1a56db;
+            --primary-hover: #1e429f;
+            --secondary-color: #e2e8f0;
+            --border-color: #e5e7eb;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #dc2626;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --heading-color: #1f2937;
+            --table-header-bg: #f3f4f6;
+            --table-hover: #f9fafb;
+            --navbar-bg: #ffffff;
+            --toolbar-bg: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode variables */
+            --background-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary-color: #374151;
+            --border-color: #374151;
+            --accent-color: #60a5fa;
+            --success-color: #34d399;
+            --warning-color: #fbbf24;
+            --danger-color: #ef4444;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --heading-color: #f3f4f6;
+            --table-header-bg: #1f2937;
+            --table-hover: #283548;
+            --navbar-bg: #1f2937;
+            --toolbar-bg: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--navbar-bg);
+            box-shadow: var(--shadow);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 10px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--toolbar-bg);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .toolbar-title {
+            font-size: 1.5rem;
+            color: var(--heading-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--border-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .card-title {
+            color: var(--heading-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+            color: var(--heading-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            width: 150px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .detail-value {
+            flex: 1;
+            color: var(--text-color);
+        }
+
+        .evidence-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .evidence-item {
+            padding: 15px;
+            background-color: var(--background-color);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .evidence-item:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .evidence-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .evidence-link:hover {
+            color: var(--primary-hover);
+        }
+
+        .evidence-image {
+            max-width: 100%;
+            border-radius: 6px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .evidence-image:hover {
+            transform: scale(1.01);
+            box-shadow: var(--shadow);
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .severity-high {
+            background-color: var(--danger-color);
+        }
+
+        .severity-medium {
+            background-color: var(--warning-color);
+        }
+
+        .severity-low {
+            background-color: var(--success-color);
+        }
+
+        .analysis-box {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .action-steps {
+            padding-left: 20px;
+            margin-top: 15px;
+        }
+
+        .action-steps li {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .toolbar {
+                position: relative;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: var(--text-color);
+                font-size: 1.2rem;
+                cursor: pointer;
+            }
+            
+            .sidebar.active {
+                width: 250px;
+                padding: 20px 0;
+            }
+
+            .detail-row {
+                flex-direction: column;
+            }
+
+            .detail-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Malawi CyberSec</span>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{% url 'dashboard' %}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'report_cybercrime' %}" class="nav-link">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Report Crime</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <i class="fas fa-search"></i>
+                        <span>Report Analysis</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Resources</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="main-content">
+            <div class="container">
+                <div class="toolbar">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="toolbar-title">
+                        <i class="fas fa-file-alt"></i>
+                        Report Analysis
+                    </h2>
+                    <div class="toolbar-actions">
+                        <button class="theme-toggle" id="theme-toggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Report #{{ report.id }} - {{ report.get_crime_type_display }}</h3>
+                        <div>
+                            {% if report.status == 'pending' %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% elif report.status == 'investigating' %}
+                                <span class="badge badge-primary">Investigating</span>
+                            {% elif report.status == 'resolved' %}
+                                <span class="badge badge-success">Resolved</span>
+                            {% else %}
+                                <span class="badge badge-danger">New</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Incident Details
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Crime Type</div>
+                            <div class="detail-value">{{ report.get_crime_type_display }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Incident Date</div>
+                            <div class="detail-value">{{ report.incident_date|date:"F j, Y, g:i a" }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value">{{ report.description }}</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-header">
+                            <i class="fas fa-user-shield"></i>
+                            Reporter Information
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Name</div>
+                            <div class="detail-value">{{ report.reporter_name|default:"Anonymous" }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">{{ report.reporter_email|default:"Not provided" }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">{{ report.reporter_phone|default:"Not provided" }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Additional Info</div>
+                            <div class="detail-value">{{ report.additional_info|default:"None" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-header">
+                            <i class="fas fa-paperclip"></i>
+                            Evidence Files
+                        </div>
+                        {% if evidence_files %}
+                            <ul class="evidence-list">
+                                {% for evidence in evidence_files %}
+                                    <li class="evidence-item">
+                                        <a href="{{ evidence.file.url }}" target="_blank" class="evidence-link">
+                                            <i class="fas fa-file"></i>
+                                            {{ evidence.file.name }}
+                                        </a>
+                                        {% if evidence.file.name|lower|slice:"-4:" == ".jpg" or evidence.file.name|lower|slice:"-4:" == ".png" %}
+                                            <img src="{{ evidence.file.url }}" alt="Evidence Image" class="evidence-image">
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No evidence files uploaded.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="section">
+                        <div class="section-header">
+                            <i class="fas fa-chart-pie"></i>
+                            Analysis Summary
+                        </div>
+                        
+                        {% if report.crime_type in "hacking,data_breach" %}
+                            <div class="severity severity-high">High Severity - Immediate action recommended</div>
+                        {% elif report.crime_type in "phishing,malware" %}
+                            <div class="severity severity-medium">Medium Severity - Monitor and mitigate</div>
+                        {% else %}
+                            <div class="severity severity-low">Low Severity - Review and document</div>
+                        {% endif %}
+                        
+                        <div class="analysis-box">
+                            <h4>Potential Impact</h4>
+                            <p>This {{ report.get_crime_type_display }} incident could affect:</p>
+                            <ul class="action-steps">
+                                <li>System integrity and security posture</li>
+                                <li>Data privacy and confidentiality</li>
+                                <li>User trust and organizational reputation</li>
+                                {% if report.crime_type in "hacking,data_breach" %}
+                                    <li>Regulatory compliance and potential legal ramifications</li>
+                                {% endif %}
+                            </ul>
+                            
+                            <h4 style="margin-top: 20px;">Recommended Actions</h4>
+                            <ul class="action-steps">
+                                <li>Investigate incident details and scope of impact</li>
+                                <li>Isolate affected systems if applicable</li>
+                                {% if report.crime_type in "hacking,data_breach" %}
+                                    <li>Engage cybersecurity response team immediately</li>
+                                    <li>Prepare notification to affected parties</li>
+                                {% endif %}
+                                <li>Document findings and update security protocols</li>
+                                <li>Implement preventive measures to avoid recurrence</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-file-export"></i> Export Report
+                        </a>
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-pen"></i> Update Status
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+        
+        // Check for saved theme preference or use prefer-color-scheme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = prefersDark ? 'dark' : 'light';
+            html.setAttribute('data-theme', initialTheme);
+            updateThemeIcon(initialTheme);
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+        
+        // Mobile menu toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+        }
+    </script>
+</body>
+</html>

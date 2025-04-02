@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malawi Police System - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f4f8;
+        }
+        .login-bg {
+            background: linear-gradient(135deg, #1a5f7a 0%, #0e3b4f 100%);
+        }
+        @font-face {
+            font-family: 'Troy';
+            src: url('{% static 'troy.woff2' %}') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        /* Apply the font to specific elements */
+        body {
+            font-family: 'Troy', sans-serif;
+        }
+        
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md">
+        <div class="bg-white shadow-2xl rounded-xl overflow-hidden">
+            <div class="login-bg p-6 text-center">
+                <img src="{% static 'mw.png' %}" alt="Malawi Police Logo" class="mx-auto mb-4 rounded-full w-20 h-20 object-cover">
+                <h2 class="text-2xl font-bold text-white">Malawi Police System</h2>
+            </div>
+            <form id="loginForm" class="p-8" method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 text-red-600">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 font-bold mb-2">
+                        <i class="fas fa-user mr-2"></i>Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 font-bold mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            placeholder="Enter your password"
+                            required
+                        >
+                        <button 
+                            type="button" 
+                            id="togglePassword" 
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button 
+                    type="submit" 
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 font-bold"
+                >
+                    LOGIN
+                </button>
+                <div class="text-center mt-4">
+                    <a href="#" class="text-blue-600 hover:underline text-sm">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+        <div class="text-center mt-4 text-gray-600">
+            <p>© 2025 Malawi Police Service. All Rights Reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' 
+                ? '<i class="fas fa-eye"></i>' 
+                : '<i class="fas fa-eye-slash"></i>';
+        });
+    </script>
+</body>
+</html>
