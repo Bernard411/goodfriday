@@ -3,7 +3,7 @@
 
 # Set your GitHub username and password (replace with your actual credentials)
 USERNAME="Bernard411"
-PASSWORD="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"
+PASSWORD="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"
 
 # Change directory to your website directory on PythonAnywhere
 cd /path/to/your/website/directory
