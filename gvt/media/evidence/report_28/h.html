@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Speed</title>
+</head>
+<body>
+  <h1>Network Speed Details</h1>
+  <p><strong>Network Type:</strong> <span id="networkType">Loading...</span></p>
+  <p><strong>Estimated Downlink:</strong> <span id="downlinkSpeed">Loading...</span> Mbps</p>
+  <p><strong>Effective Type:</strong> <span id="effectiveType">Loading...</span></p>
+  <p><strong>RTT (Round Trip Time):</strong> <span id="rtt">Loading...</span> ms</p>
+
+  <script>
+    function getNetworkSpeed() {
+      if ('connection' in navigator) {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        document.getElementById('networkType').innerText = connection.type || 'Unknown';
+        document.getElementById('downlinkSpeed').innerText = connection.downlink || 'Unknown';
+        document.getElementById('effectiveType').innerText = connection.effectiveType || 'Unknown';
+        document.getElementById('rtt').innerText = connection.rtt || 'Unknown';
+      } else {
+        document.getElementById('networkType').innerText = 'Not Supported';
+        document.getElementById('downlinkSpeed').innerText = 'Not Supported';
+        document.getElementById('effectiveType').innerText = 'Not Supported';
+        document.getElementById('rtt').innerText = 'Not Supported';
+      }
+    }
+
+    getNetworkSpeed();
+  </script>
+</body>
+</html>

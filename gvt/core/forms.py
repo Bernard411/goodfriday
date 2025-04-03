@@ -1,7 +1,5 @@
 from django import forms
 from .models import CybercrimeReport, EvidenceFile
-from django import forms
-from .models import CybercrimeReport, EvidenceFile
 
 class CybercrimeReportForm(forms.ModelForm):
     class Meta:
@@ -19,6 +17,7 @@ class CybercrimeReportForm(forms.ModelForm):
             'reporter_phone': forms.TextInput(attrs={'class': 'form-control'}),
             'additional_info': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
+
 class EvidenceFileForm(forms.ModelForm):
     """
     Form for uploading evidence files.
@@ -27,7 +26,7 @@ class EvidenceFileForm(forms.ModelForm):
         model = EvidenceFile
         fields = ['file']
 
-# For handling multiple file uploads
+# For handling multiple file uploads (optional, if you want to use formsets)
 EvidenceFileFormSet = forms.inlineformset_factory(
     CybercrimeReport,
     EvidenceFile,

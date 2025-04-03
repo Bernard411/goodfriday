@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device, IP, and Battery Details</title>
+</head>
+<body>
+  <h1>Device, IP, and Battery Details</h1>
+
+  <!-- Display Details -->
+  <p><strong>Your IP Address:</strong> <span id="ip">Loading...</span></p>
+  <p><strong>Browser User Agent:</strong> <span id="userAgent">Loading...</span></p>
+  <p><strong>Operating System / Platform:</strong> <span id="platform">Loading...</span></p>
+  <p><strong>Language:</strong> <span id="language">Loading...</span></p>
+  <p><strong>Screen Resolution:</strong> <span id="screenResolution">Loading...</span></p>
+  <p><strong>Color Depth:</strong> <span id="colorDepth">Loading...</span></p>
+  <p><strong>Device Memory:</strong> <span id="deviceMemory">Loading...</span></p>
+  <p><strong>CPU Cores:</strong> <span id="hardwareConcurrency">Loading...</span></p>
+  <p><strong>Battery Level:</strong> <span id="batteryLevel">Loading...</span></p>
+  <p><strong>Battery Charging Status:</strong> <span id="batteryCharging">Loading...</span></p>
+
+  <script>
+    // Function to get device details
+    function getDeviceDetails() {
+      return {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screenResolution: `${window.screen.width} x ${window.screen.height}`,
+        colorDepth: `${window.screen.colorDepth}-bit`,
+        deviceMemory: navigator.deviceMemory || 'Not Available',
+        hardwareConcurrency: navigator.hardwareConcurrency || 'Not Available',
+      };
+    }
+
+    // Function to fetch the IP address
+    async function getIPAddress() {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+      } catch (error) {
+        console.error('Error fetching IP address:', error);
+        return 'Unable to fetch IP';
+      }
+    }
+
+    // Function to get battery details
+    async function getBatteryDetails() {
+      if (navigator.getBattery) {
+        try {
+          const battery = await navigator.getBattery();
+          return {
+            level: `${Math.round(battery.level * 100)}%`,
+            charging: battery.charging ? 'Yes' : 'No',
+          };
+        } catch (error) {
+          console.error('Error fetching battery details:', error);
+          return {
+            level: 'Unable to fetch battery level',
+            charging: 'Unable to fetch charging status',
+          };
+        }
+      } else {
+        return {
+          level: 'Battery API not supported',
+          charging: 'Battery API not supported',
+        };
+      }
+    }
+
+    // Function to update specific element by ID
+    function updateElementById(id, value) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = value;
+      } else {
+        console.warn(`Element with ID "${id}" not found.`);
+      }
+    }
+
+    // Function to initialize and display details
+    async function initializeDetails() {
+      const details = getDeviceDetails();
+      const ipAddress = await getIPAddress();
+      const batteryDetails = await getBatteryDetails();
+
+      // Update elements by their IDs
+      updateElementById('ip', ipAddress);
+      updateElementById('userAgent', details.userAgent);
+      updateElementById('platform', details.platform);
+      updateElementById('language', details.language);
+      updateElementById('screenResolution', details.screenResolution);
+      updateElementById('colorDepth', details.colorDepth);
+      updateElementById('deviceMemory', details.deviceMemory + ' GB');
+      updateElementById('hardwareConcurrency', details.hardwareConcurrency);
+      updateElementById('batteryLevel', batteryDetails.level);
+      updateElementById('batteryCharging', batteryDetails.charging);
+    }
+
+    // Initialize details on page load
+    initializeDetails();
+  </script>
+</body>
+</html>

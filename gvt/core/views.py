@@ -4,17 +4,29 @@ from .models import CybercrimeReport, EvidenceFile
 
 def report_cybercrime(request):
     """
-    View to handle cybercrime report submission with multiple file uploads.
+    View to handle cybercrime report submission with multiple file uploads and metadata.
     """
     if request.method == 'POST':
         form = CybercrimeReportForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the report
-            report = form.save()
+            # Save the report without committing yet
+            report = form.save(commit=False)
+            
+            # Add metadata from the request
+            report.latitude = request.POST.get('latitude')
+            report.longitude = request.POST.get('longitude')
+            report.browser_info = request.POST.get('browser_info')
+            report.device_info = request.POST.get('device_info')
+            report.ip_address = request.META.get('REMOTE_ADDR')  # Capture IP address
+            
+            # Save the report to the database
+            report.save()
+            
             # Handle multiple file uploads
             files = request.FILES.getlist('evidence_files')
             for file in files:
                 EvidenceFile.objects.create(report=report, file=file)
+            
             return render(request, 'report_success.html', {'message': 'Report submitted successfully!'})
     else:
         form = CybercrimeReportForm()

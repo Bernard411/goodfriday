@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Facilities Near You</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            width: 100%;
+            height: 70vh;
+        }
+
+        #facility-list {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="facility-list"><strong>Medical Facilities within 10km:</strong><ul id="list"></ul></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map');
+
+        // Add tile layer
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+        }).addTo(map);
+
+        // Fetch medical facilities within 10km of a point
+        function fetchMedicalFacilities(lat, lng) {
+            // Overpass API query with multiple tags
+            const query = `
+		    [out:json];
+		    (
+			node(around:15000,${lat},${lng})[amenity=hospital];
+			node(around:15000,${lat},${lng})[amenity=clinic];
+			node(around:15000,${lat},${lng})[amenity=pharmacy];
+			node(around:15000,${lat},${lng})[healthcare];
+			node(around:15000,${lat},${lng})[name~"Hospital|Clinic", i];
+		    );
+		    out body;
+		`;
+
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const facilities = data.elements;
+                    const facilityList = document.getElementById('list');
+                    facilityList.innerHTML = ''; // Clear previous results
+
+                    facilities.forEach(facility => {
+                        // Add a marker for each facility
+                        const marker = L.marker([facility.lat, facility.lon]).addTo(map);
+                        marker.bindPopup(
+                            `<strong>${facility.tags.name || "Unnamed Facility"}</strong><br>
+                            Type: ${facility.tags.amenity || facility.tags.healthcare || "Unknown"}`
+                        );
+
+                        // Add facility to the list
+                        const li = document.createElement('li');
+                        li.textContent = `${facility.tags.name || "Unnamed Facility"} (${facility.tags.amenity || facility.tags.healthcare || "Unknown"})`;
+                        facilityList.appendChild(li);
+                    });
+
+                    if (facilities.length === 0) {
+                        facilityList.innerHTML = '<li>No medical facilities found within 10km.</li>';
+                    }
+                })
+                .catch(error => console.error('Error fetching medical facilities:', error));
+        }
+
+        // Get user's location and center map
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const { latitude, longitude } = position.coords;
+                    map.setView([latitude, longitude], 14);
+
+                    // Add a marker for the user's location
+                    L.marker([latitude, longitude])
+                        .addTo(map)
+                        .bindPopup("You are here")
+                        .openPopup();
+
+                    // Fetch medical facilities nearby
+                    fetchMedicalFacilities(latitude, longitude);
+                },
+                error => {
+                    console.error("Error getting user location:", error);
+                    alert("Unable to retrieve your location.");
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
+    </script>
+</body>
+</html>

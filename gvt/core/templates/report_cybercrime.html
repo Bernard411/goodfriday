@@ -726,7 +726,6 @@
                             </div>
                         </div>
                         
-                        
                         <!-- Evidence Upload Section -->
                         <div class="form-section">
                             <h3 class="section-header">
@@ -743,6 +742,12 @@
                             
                             <div id="file-preview" class="file-preview"></div>
                         </div>
+                        
+                        <!-- Hidden Fields for Metadata -->
+                        <input type="hidden" name="latitude" id="latitude">
+                        <input type="hidden" name="longitude" id="longitude">
+                        <input type="hidden" name="browser_info" id="browser_info">
+                        <input type="hidden" name="device_info" id="device_info">
                         
                         <!-- Verification Section -->
                         <div class="checkbox-group">
@@ -761,6 +766,63 @@
                         </button>
                     </div>
                 </form>
+                
+                <!-- JavaScript for Metadata Collection -->
+                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.getElementById('report-form');
+                    
+                    // Function to get geolocation
+                    function getGeolocation() {
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    document.getElementById('latitude').value = position.coords.latitude;
+                                    document.getElementById('longitude').value = position.coords.longitude;
+                                },
+                                (error) => {
+                                    console.error('Geolocation error:', error);
+                                    document.getElementById('latitude').value = '';
+                                    document.getElementById('longitude').value = '';
+                                }
+                            );
+                        } else {
+                            console.error('Geolocation not supported by this browser.');
+                        }
+                    }
+                
+                    // Function to get browser and device info
+                    function getBrowserAndDeviceInfo() {
+                        const userAgent = navigator.userAgent;
+                        let browserInfo = '';
+                        let deviceInfo = '';
+                
+                        // Browser detection
+                        if (userAgent.includes('Chrome')) browserInfo = 'Chrome';
+                        else if (userAgent.includes('Firefox')) browserInfo = 'Firefox';
+                        else if (userAgent.includes('Safari')) browserInfo = 'Safari';
+                        else if (userAgent.includes('Edge')) browserInfo = 'Edge';
+                        else browserInfo = 'Unknown';
+                
+                        browserInfo += ` ${navigator.appVersion}`;
+                
+                        // Device info
+                        deviceInfo = `${navigator.platform} | Language: ${navigator.language}`;
+                
+                        document.getElementById('browser_info').value = browserInfo;
+                        document.getElementById('device_info').value = deviceInfo;
+                    }
+                
+                    // Collect data when the page loads
+                    getGeolocation();
+                    getBrowserAndDeviceInfo();
+                
+                    // Optional: Handle form submission
+                    form.addEventListener('submit', function (event) {
+                        // You can add validation here if needed
+                    });
+                });
+                </script>
             </div>
         </div>
     </main>

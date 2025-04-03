@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Map Search</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            width: 100%;
+            height: 70vh;
+        }
+        #controls {
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .results {
+            padding: 10px;
+            max-height: 30vh;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button id="hospitalBtn">Hospitals</button>
+        <button id="policeBtn">Police Stations</button>
+    </div>
+    <div id="map"></div>
+    <div class="results" id="results"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([-13.9626, 33.7741], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const markers = L.layerGroup().addTo(map);
+        const resultsDiv = document.getElementById('results');
+
+        function fetchLocations(type) {
+            // Get user's current position
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Define Overpass API query
+                const queries = {
+                    hospitals: `
+                        [out:json];
+                        (
+                            node(around:15000,${lat},${lng})[amenity=hospital];
+                            node(around:15000,${lat},${lng})[amenity=clinic];
+                            node(around:15000,${lat},${lng})[healthcare];
+                            node(around:15000,${lat},${lng})[name~"Hospital|Clinic", i];
+                        );
+                        out body;
+                    `,
+                    police: `
+                        [out:json];
+                        (
+                            node(around:15000,${lat},${lng})[amenity=police];
+                            node(around:15000,${lat},${lng})[name~"Police", i];
+                        );
+                        out body;
+                    `
+                };
+
+                const query = queries[type];
+
+                // Fetch data from Overpass API
+                fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        // Clear previous markers and results
+                        markers.clearLayers();
+                        resultsDiv.innerHTML = '';
+
+                        if (data.elements.length === 0) {
+                            resultsDiv.innerHTML = `<p>No ${type} found within 15 km radius.</p>`;
+                            return;
+                        }
+
+                        data.elements.forEach((el) => {
+                            if (el.lat && el.lon) {
+                                // Add marker to the map
+                                const marker = L.marker([el.lat, el.lon]).addTo(markers);
+                                marker.bindPopup(`<strong>${el.tags.name || 'Unknown Name'}</strong>`);
+
+                                // Add to the results list
+                                const listItem = document.createElement('p');
+                                listItem.textContent = el.tags.name || 'Unknown Name';
+                                resultsDiv.appendChild(listItem);
+                            }
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching data:', error);
+                        resultsDiv.innerHTML = `<p>Error fetching ${type}. Please try again later.</p>`;
+                    });
+            });
+        }
+
+        // Event listeners for buttons
+        document.getElementById('hospitalBtn').addEventListener('click', () => fetchLocations('hospitals'));
+        document.getElementById('policeBtn').addEventListener('click', () => fetchLocations('police'));
+    </script>
+</body>
+</html>

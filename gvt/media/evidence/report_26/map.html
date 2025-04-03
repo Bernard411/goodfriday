@@ -1,0 +1,125 @@
+
+
+                              <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Search, Directions, and Layers</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <!-- Leaflet Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+     
+
+        #map {
+            width: 100%;
+            height: 70vh;
+        }
+
+       
+    </style>
+</head>
+
+<body>
+  
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Draw JS -->
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <!-- Leaflet Geocoder JS -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <!-- Leaflet Routing Machine -->
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <script>
+        // Initialize the map and set its view to Lilongwe
+        var map = L.map('map').setView([-13.9626, 33.7741], 14);
+
+        // Google Maps tile layers
+        var googleRoadmap = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+        });
+
+        var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+        });
+
+        var googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+        });
+
+        // Add default layer to the map
+        googleRoadmap.addTo(map);
+
+        // Layer control for switching between Google Maps layers
+        var baseLayers = {
+            "Google Roadmap": googleRoadmap,
+            "Google Satellite": googleSatellite,
+            "Google Hybrid": googleHybrid
+        };
+        L.control.layers(baseLayers).addTo(map);
+
+        // Add search functionality
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: false
+        })
+        .on('markgeocode', function(e) {
+            var bbox = e.geocode.bbox;
+            var poly = L.polygon([
+                [bbox.getSouthEast().lat, bbox.getSouthEast().lng],
+                [bbox.getNorthEast().lat, bbox.getNorthEast().lng],
+                [bbox.getNorthWest().lat, bbox.getNorthWest().lng],
+                [bbox.getSouthWest().lat, bbox.getSouthWest().lng]
+            ]);
+            map.fitBounds(poly.getBounds());
+        })
+        .addTo(map);
+
+        // Initialize Leaflet Draw control
+        
+
+        
+
+        // Fetch saved geofences
+        
+        document.getElementById('searchButton').addEventListener('click', function() {
+            var searchText = document.getElementById('search').value;
+
+            if (!searchText) {
+                alert('Please enter a location to search.');
+                return;
+            }
+
+            geocoder.options.geocode(searchText, function(results) {
+                if (results.length > 0) {
+                    var result = results[0];
+                    map.setView(result.center, 15);
+
+                    // If directions are enabled, add route to destination
+                    if (routingControl) {
+                        map.removeControl(routingControl);
+                    }
+
+                    routingControl = L.Routing.control({
+                        waypoints: [
+                            L.latLng(map.getCenter()), // User's current location
+                            result.center
+                        ],
+                        routeWhileDragging: true
+                    }).addTo(map);
+                } else {
+                    alert('Location not found.');
+                }
+            });
+        });
+    </script>
