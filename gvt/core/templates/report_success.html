@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            
             background-color: #f4f4f4;
             text-align: center;
             padding: 50px;
@@ -35,6 +35,16 @@
         }
         .btn:hover {
             background: #0056b3;
+        }
+        @font-face {
+            font-family: 'Troy';
+            src: url('{% static 'troy.woff2' %}') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Troy', sans-serif;
         }
     </style>
 </head>
