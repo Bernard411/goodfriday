@@ -1,48 +1,43 @@
 from django.shortcuts import render, redirect
 from .forms import CybercrimeReportForm
 from .models import CybercrimeReport, EvidenceFile
+from .models import CybercrimeReport, EvidenceFile, CRIME_TYPES  # Import CRIME_TYPES
 
 def report_cybercrime(request):
-    """
-    View to handle cybercrime report submission with multiple file uploads and metadata.
-    """
     if request.method == 'POST':
         form = CybercrimeReportForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the report without committing yet
             report = form.save(commit=False)
-            
-            # Add metadata from the request
             report.latitude = request.POST.get('latitude')
             report.longitude = request.POST.get('longitude')
             report.browser_info = request.POST.get('browser_info')
             report.device_info = request.POST.get('device_info')
-            report.ip_address = request.META.get('REMOTE_ADDR')  # Capture IP address
-            
-            # Save the report to the database
+            report.ip_address = request.META.get('REMOTE_ADDR')
             report.save()
             
-            # Handle multiple file uploads
+            # Calculate priority score
+            report.calculate_priority_score()
+            
             files = request.FILES.getlist('evidence_files')
             for file in files:
                 EvidenceFile.objects.create(report=report, file=file)
             
-            return render(request, 'report_success.html', {'message': 'Report submitted successfully!'})
+            return render(request, 'report_success.html', {
+                'message': 'Report submitted successfully!',
+                'report': report,
+                'evidence_files': report.evidence_files.all()
+            })
     else:
         form = CybercrimeReportForm()
 
     return render(request, 'report_cybercrime.html', {'form': form})
 
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import CybercrimeReport, EvidenceFile
-from .forms import CybercrimeReportForm
-from django.contrib import messages
-
-
 def dashboard(request):
-    reports = CybercrimeReport.objects.all()
-    return render(request, 'dashboard.html', {'reports': reports})
+    reports = CybercrimeReport.objects.all()  # Ordered by priority_score due to Meta
+    return render(request, 'dashboard.html', {
+        'reports': reports,
+        'CRIME_TYPES': CRIME_TYPES
+    })
 
 def delete_report(request, report_id):
     report = get_object_or_404(CybercrimeReport, id=report_id)
@@ -208,3 +203,98 @@ def export_report(request, report_id):
     
     except CybercrimeReport.DoesNotExist:
         return HttpResponse("Report not found", status=404)
+    
+    
+    
+    from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from .forms import CybercrimeReportForm
+from .models import CybercrimeReport, EvidenceFile
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+import io
+import os
+import qrcode
+from PIL import Image as PILImage
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
+# Existing views (report_cybercrime and export_report) remain unchanged
+# Add this new view:
+
+def export_all_data_to_excel(request):
+    """
+    Export all CybercrimeReport and EvidenceFile data to an Excel file.
+    """
+    # Create a workbook and sheets
+    wb = Workbook()
+    
+    # Cybercrime Reports Sheet
+    ws_reports = wb.active
+    ws_reports.title = "Cybercrime Reports"
+    
+    # Define headers for CybercrimeReport
+    report_headers = [
+        "ID", "Crime Type", "Incident Date", "Description", "Reporter Name", 
+        "Reporter Email", "Reporter Phone", "Additional Info", "Submitted At", 
+        "Latitude", "Longitude", "Browser Info", "IP Address", "Device Info"
+    ]
+    ws_reports.append(report_headers)
+    
+    # Fetch all reports
+    reports = CybercrimeReport.objects.all()
+    for report in reports:
+        ws_reports.append([
+            report.id,
+            report.get_crime_type_display(),  # Human-readable crime type
+            report.incident_date.strftime('%Y-%m-%d %H:%M:%S') if report.incident_date else '',
+            report.description,
+            report.reporter_name or '',
+            report.reporter_email or '',
+            report.reporter_phone or '',
+            report.additional_info or '',
+            report.submitted_at.strftime('%Y-%m-%d %H:%M:%S') if report.submitted_at else '',
+            report.latitude,
+            report.longitude,
+            report.browser_info or '',
+            report.ip_address or '',
+            report.device_info or ''
+        ])
+    
+    # Evidence Files Sheet
+    ws_evidence = wb.create_sheet(title="Evidence Files")
+    
+    # Define headers for EvidenceFile
+    evidence_headers = ["Report ID", "File Name", "Uploaded At"]
+    ws_evidence.append(evidence_headers)
+    
+    # Fetch all evidence files
+    evidence_files = EvidenceFile.objects.all()
+    for evidence in evidence_files:
+        ws_evidence.append([
+            evidence.report.id,
+            evidence.file.name,
+            evidence.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if evidence.uploaded_at else ''
+        ])
+    
+    # Adjust column widths for readability
+    for ws in [ws_reports, ws_evidence]:
+        for col in range(1, ws.max_column + 1):
+            column_letter = get_column_letter(col)
+            ws.column_dimensions[column_letter].width = 20  # Adjust width as needed
+    
+    # Save to a BytesIO buffer
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    # Create the HTTP response
+    response = HttpResponse(
+        buffer,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Cybercrime_Data.xlsx"'
+    
+    return response
