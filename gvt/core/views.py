@@ -54,7 +54,7 @@ def login_view(request):
         if user is not None:
             auth_login(request, user)
             # Redirect to a common dashboard regardless of groups
-            return redirect('create_case')  # Replace 'dashboard' with your actual dashboard URL name
+            return redirect('dashboard')  # Replace 'dashboard' with your actual dashboard URL name
         else:
             messages.error(request, "Invalid Login Credentials!")
             return render(request, 'login.html')
