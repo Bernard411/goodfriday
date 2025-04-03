@@ -1,23 +1,59 @@
+# from django.shortcuts import render, redirect
+# from .forms import CybercrimeReportForm
+# from .models import CybercrimeReport, EvidenceFile
+# from .models import CybercrimeReport, EvidenceFile, CRIME_TYPES  # Import CRIME_TYPES
+
+# def report_cybercrime(request):
+#     if request.method == 'POST':
+#         form = CybercrimeReportForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             report = form.save(commit=False)
+#             report.latitude = request.POST.get('latitude')
+#             report.longitude = request.POST.get('longitude')
+#             report.browser_info = request.POST.get('browser_info')
+#             report.device_info = request.POST.get('device_info')
+#             report.ip_address = request.META.get('REMOTE_ADDR')
+#             report.save()
+            
+#             # Calculate priority score
+#             report.calculate_priority_score()
+            
+#             files = request.FILES.getlist('evidence_files')
+#             for file in files:
+#                 EvidenceFile.objects.create(report=report, file=file)
+            
+#             return render(request, 'report_success.html', {
+#                 'message': 'Report submitted successfully!',
+#                 'report': report,
+#                 'evidence_files': report.evidence_files.all()
+#             })
+#     else:
+#         form = CybercrimeReportForm()
+
+#     return render(request, 'report_cybercrime.html', {'form': form})
+
 from django.shortcuts import render, redirect
 from .forms import CybercrimeReportForm
 from .models import CybercrimeReport, EvidenceFile
-from .models import CybercrimeReport, EvidenceFile, CRIME_TYPES  # Import CRIME_TYPES
 
 def report_cybercrime(request):
     if request.method == 'POST':
         form = CybercrimeReportForm(request.POST, request.FILES)
         if form.is_valid():
             report = form.save(commit=False)
-            report.latitude = request.POST.get('latitude')
-            report.longitude = request.POST.get('longitude')
-            report.browser_info = request.POST.get('browser_info')
-            report.device_info = request.POST.get('device_info')
-            report.ip_address = request.META.get('REMOTE_ADDR')
+            
+            # Set the optional fields with a default value if not provided
+            report.latitude = request.POST.get('latitude', '')
+            report.longitude = request.POST.get('longitude', '')
+            report.browser_info = request.POST.get('browser_info', '')
+            report.device_info = request.POST.get('device_info', '')
+            report.ip_address = request.META.get('REMOTE_ADDR', '')
             report.save()
             
             # Calculate priority score
             report.calculate_priority_score()
             
+            # Handle evidence files
             files = request.FILES.getlist('evidence_files')
             for file in files:
                 EvidenceFile.objects.create(report=report, file=file)
@@ -32,12 +68,13 @@ def report_cybercrime(request):
 
     return render(request, 'report_cybercrime.html', {'form': form})
 
+
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('report_cybercrime')
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
