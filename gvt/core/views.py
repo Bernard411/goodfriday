@@ -1,7 +1,7 @@
 # from django.shortcuts import render, redirect
 # from .forms import CybercrimeReportForm
 # from .models import CybercrimeReport, EvidenceFile
-# from .models import CybercrimeReport, EvidenceFile, CRIME_TYPES  # Import CRIME_TYPES
+from .models import CybercrimeReport, EvidenceFile, CRIME_TYPES  # Import CRIME_TYPES
 
 # def report_cybercrime(request):
 #     if request.method == 'POST':
