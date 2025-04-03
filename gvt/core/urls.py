@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.conf import settings
+from .views import logout_view
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -11,6 +12,8 @@ urlpatterns = [
     path('export-report/<int:report_id>/', views.export_report, name='export_report'),
     path('view/<int:report_id>/', views.view_report_analysis, name='view_report_analysis'),
     path('export-all-data/', views.export_all_data_to_excel, name='export_all_data'),
+    path('logout/', logout_view, name='logout'),
+    path('login/', views.login_view, name='login'),
 ]
 
 if settings.DEBUG:

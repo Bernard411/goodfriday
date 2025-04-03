@@ -32,6 +32,36 @@ def report_cybercrime(request):
 
     return render(request, 'report_cybercrime.html', {'form': form})
 
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import login as auth_login
+from .EmailBackEnd import EmailBackEnd  # Assuming this is your custom backend
+
+def login_view(request):
+    if request.method == "POST":
+        user = EmailBackEnd.authenticate(
+            request,
+            username=request.POST.get('email'),
+            password=request.POST.get('password')
+        )
+        if user is not None:
+            auth_login(request, user)
+            # Redirect to a common dashboard regardless of groups
+            return redirect('create_case')  # Replace 'dashboard' with your actual dashboard URL name
+        else:
+            messages.error(request, "Invalid Login Credentials!")
+            return render(request, 'login.html')
+    else:
+        return render(request, 'login.html')
+
+
 def dashboard(request):
     reports = CybercrimeReport.objects.all()  # Ordered by priority_score due to Meta
     return render(request, 'dashboard.html', {

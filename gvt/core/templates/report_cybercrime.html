@@ -614,19 +614,24 @@
                     <a href="#" class="nav-link">
                         <i class="fas fa-home"></i> Home
                     </a>
-                    <a href="#" class="nav-link">
+                    <!-- <a href="#" class="nav-link">
                         <i class="fas fa-book"></i> Resources
-                    </a>
-                    <a href="#" class="nav-link">
+                    </a> -->
+                    <a href="#info" class="nav-link">
                         <i class="fas fa-question-circle"></i> Help
                     </a>
                 </div>
-                <a href="#" class="login-btn">
+                <a href="{% url 'logout' %}" class="login-btn">
                     <i class="fas fa-user-shield"></i> Login
                 </a>
             </div>
         </div>
     </header>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.body.style.zoom = "90%";
+        });
+    </script>
 
     <!-- Page Title -->
     <div class="page-title">
@@ -828,7 +833,7 @@
     </main>
 
     <!-- Footer -->
-    <footer>
+    <footer id="info">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-section">
