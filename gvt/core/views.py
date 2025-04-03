@@ -42,7 +42,7 @@ def report_cybercrime(request):
         if form.is_valid():
             report = form.save(commit=False)
             
-            # Set the optional fields with a default value if not provided
+            # Set optional fields with a default value if not provided
             report.latitude = request.POST.get('latitude', '')
             report.longitude = request.POST.get('longitude', '')
             report.browser_info = request.POST.get('browser_info', '')
@@ -58,15 +58,23 @@ def report_cybercrime(request):
             for file in files:
                 EvidenceFile.objects.create(report=report, file=file)
             
-            return render(request, 'report_success.html', {
-                'message': 'Report submitted successfully!',
-                'report': report,
-                'evidence_files': report.evidence_files.all()
-            })
+            # Redirect to success page with report ID
+            return redirect('success', report_id=report.id)
     else:
         form = CybercrimeReportForm()
 
     return render(request, 'report_cybercrime.html', {'form': form})
+
+def report_success(request, report_id):
+    report = CybercrimeReport.objects.get(id=report_id)
+    evidence_files = report.evidence_files.all()
+    
+    return render(request, 'report_success.html', {
+        'message': 'Report submitted successfully!',
+        'report': report,
+        'evidence_files': evidence_files
+    })
+
 
 
 from django.contrib.auth import logout

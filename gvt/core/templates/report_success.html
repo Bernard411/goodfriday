@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Submitted</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .icon {
+            font-size: 50px;
+            color: green;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <i class="fas fa-check-circle icon"></i>
+        <h2>Report Submitted Successfully</h2>
+        <p>Thank you for your report. Our team will review it shortly.</p>
+
+        {% if evidence_files %}
+            <h3>Uploaded Evidence:</h3>
+            <ul>
+                {% for file in evidence_files %}
+                    <li><a href="{{ file.file.url }}" target="_blank">{{ file.file.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <a href="{% url 'report_cybercrime' %}" class="btn">Submit Another Report</a>
+    </div>
+</body>
+</html>

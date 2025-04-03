@@ -14,6 +14,7 @@ urlpatterns = [
     path('export-all-data/', views.export_all_data_to_excel, name='export_all_data'),
     path('logout/', logout_view, name='logout'),
     path('login/', views.login_view, name='login'),
+    path('success/', views.report_success, name='success'),
 ]
 
 if settings.DEBUG:
