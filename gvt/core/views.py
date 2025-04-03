@@ -43,6 +43,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from .EmailBackEnd import EmailBackEnd  # Assuming this is your custom backend
+from django.shortcuts import get_object_or_404
+
 
 def login_view(request):
     if request.method == "POST":
