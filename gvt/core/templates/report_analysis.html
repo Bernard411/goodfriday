@@ -473,10 +473,7 @@
                         Cybersecurity Reports
                     </h2>
                     <div class="toolbar-actions">
-                        <div class="search-box">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="search-input" placeholder="Search reports...">
-                        </div>
+                       
                         <button class="theme-toggle" id="theme-toggle">
                             <i class="fas fa-moon"></i>
                         </button>
@@ -1039,12 +1036,12 @@
                         <a href="{% url 'dashboard' %}" class="btn btn-outline">
                             <i class="fas fa-arrow-left"></i> Back to Dashboard
                         </a>
-                        <a href="#" class="btn btn-primary">
+                        <a href="{% url 'export_report' report.id %}" class="btn btn-primary">
                             <i class="fas fa-file-export"></i> Export Report
                         </a>
-                        <a href="#" class="btn btn-primary">
+                        <!-- <a href="#" class="btn btn-primary">
                             <i class="fas fa-pen"></i> Update Status
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
