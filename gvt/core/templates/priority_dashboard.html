@@ -1,0 +1,466 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybercrime Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        @font-face {
+            font-family: 'Troy';
+            src: url('{% static 'troy.woff2' %}') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar .nav-link {
+            color: #202124;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: #f1f3f4;
+            color: #1a73e8;
+        }
+
+        .sidebar .material-icons {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .content {
+            transition: margin-left 0.3s ease;
+        }
+
+        .content.shifted {
+            margin-left: 250px;
+        }
+
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand img {
+            max-height: 32px;
+        }
+
+        .navbar-brand span {
+            font-size: 1.1rem;
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            color: #1a73e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table th {
+            background-color: #f1f3f4;
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+
+        .btn-primary:hover {
+            background-color: #1557b0;
+            border-color: #1557b0;
+        }
+
+        .btn-success {
+            background-color: #34a853;
+            border-color: #34a853;
+        }
+
+        .btn-success:hover {
+            background-color: #2c8b47;
+            border-color: #2c8b47;
+        }
+
+        .btn-warning {
+            background-color: #fbbc05;
+            border-color: #fbbc05;
+            color: #202124;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #e0a800;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+
+        .badge-success {
+            background-color: #34a853;
+        }
+
+        .badge-warning {
+            background-color: #fbbc05;
+            color: #202124;
+        }
+
+        @media (max-width: 576px) {
+            .table-responsive {
+                font-size: 0.75rem;
+            }
+            .btn-sm {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.7rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .navbar-brand span {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar {
+                left: 0;
+            }
+            .content {
+                margin-left: 250px;
+            }
+            .navbar .btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="p-3">
+        <!-- <div class="d-flex align-items-center mb-3">
+           
+            <span style="font-size: 1.1rem; font-weight: 500; color: #202124;">Malawi Cybercrime</span>
+        </div> -->
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="{% url 'dashboard' %}"><i class="material-icons">dashboard</i> Dashboard</a>
+            <a class="nav-link" href="{% url 'report_cybercrime' %}"><i class="material-icons">report</i> Report Cybercrime</a>
+         
+            <a class="nav-link" href="{% url 'statistics' %}"><i class="material-icons">bar_chart</i> Statistics</a>
+            <a class="nav-link" href="{% url 'report_analysis' 0 %}"><i class="material-icons">analytics</i> Report Analysis</a>
+            <a class="nav-link" href="{% url 'export_all_data' %}"><i class="material-icons">file_download</i> Export All Reports</a>
+            <a class="nav-link" href="{% url 'logout' %}"><i class="material-icons">logout</i> Logout</a>
+        </nav>
+    </div>
+    <div class="text-center p-3" style="font-size: 0.85rem; color: #888; border-top: 1px solid #eee;">
+        &copy; {{ year|default:"2024" }} Malawi Cybercrime System
+    </div>
+</div>
+
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <button class="btn" id="sidebar-toggle">
+                <i class="material-icons">menu</i>
+            </button>
+            <!-- <a class="navbar-brand" href="#">
+                <img src="{% static 'mw.png' %}" alt="Logo">
+                <span>Malawi Cybercrime System</span>
+            </a> -->
+            <div class="ms-auto d-flex align-items-center">
+                <button class="btn" id="theme-toggle">
+                    <i class="material-icons">dark_mode</i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-3 content" id="content">
+        <img src="{% static 'mw.png' %}" alt="Logo" style="max-height: 32px; vertical-align: middle;">
+        <i class="material-icons" style="vertical-align: middle; color: #1a73e8; font-size: 1.6rem;">security</i>
+        <span style="font-weight: 500; color: #202124; font-size: 1.3rem; vertical-align: middle; margin-left: 10px;">Malawi Cybercrime Reporting System</span>
+
+        <!-- Filters -->
+       <div class="card">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-sm-6">
+                <label class="form-label" style="font-size: 0.9rem; color: #5f6368;">
+                    <i class="material-icons" style="font-size: 16px; vertical-align: middle;">priority_high</i> Priority:
+                </label>
+                <select name="priority" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">All Priorities</option>
+                    <option value="critical" {% if selected_priority == 'critical' %}selected{% endif %}>Critical</option>
+                    <option value="high" {% if selected_priority == 'high' %}selected{% endif %}>High</option>
+                    <option value="medium" {% if selected_priority == 'medium' %}selected{% endif %}>Medium</option>
+                    <option value="low" {% if selected_priority == 'low' %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label" style="font-size: 0.9rem; color: #5f6368;">
+                    <i class="material-icons" style="font-size: 16px; vertical-align: middle;">calendar_today</i> Date Range:
+                </label>
+                <select name="date_range" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">All Time</option>
+                    <option value="today" {% if selected_date_range == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if selected_date_range == 'week' %}selected{% endif %}>Last Week</option>
+                    <option value="month" {% if selected_date_range == 'month' %}selected{% endif %}>Last Month</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+        <!-- Statistics Cards -->
+        <!-- <div class="stats-grid">
+            {% for stat in priority_stats %}
+            <div class="stat-card">
+                <i class="material-icons stat-icon">priority_high</i>
+                <div class="stat-title">{{ stat.priority_level|title }}</div>
+                <div class="stat-value">{{ stat.count }}</div>
+                <div style="font-size: 0.85rem; color: #5f6368;">Reports</div>
+            </div>
+            {% endfor %}
+        </div> -->
+
+        <!-- Reports Table -->
+       <div class="card">
+    <div class="card-header">
+        <i class="material-icons" style="vertical-align: middle; color: #1a73e8; margin-right: 6px;">assignment</i>
+        Reports
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th><i class="material-icons" title="ID" style="vertical-align: middle; font-size: 1rem;">tag</i> ID</th>
+                        <th><i class="material-icons" title="Crime Type" style="vertical-align: middle; font-size: 1rem;">gavel</i> Crime Type</th>
+                        <th><i class="material-icons" title="Priority" style="vertical-align: middle; font-size: 1rem;">priority_high</i> Priority</th>
+                        <th><i class="material-icons" title="Score" style="vertical-align: middle; font-size: 1rem;">star_rate</i> Score</th>
+                        <th><i class="material-icons" title="Status" style="vertical-align: middle; font-size: 1rem;">flag</i> Status</th>
+                        <th><i class="material-icons" title="Date" style="vertical-align: middle; font-size: 1rem;">calendar_today</i> Date</th>
+                        <th><i class="material-icons" title="Actions" style="vertical-align: middle; font-size: 1rem;">settings</i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body">
+                    {% for report in reports %}
+                    <tr class="{% if report.priority_level == 'critical' %}table-danger{% elif report.priority_level == 'high' %}table-warning{% endif %}">
+                        <td>{{ report.id }}</td>
+                        <td>{{ report.get_crime_type_display }}</td>
+                        <td>{{ report.priority_level|title }}</td>
+                        <td>{{ report.priority_score|floatformat:1 }}</td>
+                        <td>
+                            {% if report.is_resolved %}
+                            <span class="badge badge-success">Resolved</span>
+                            {% else %}
+                            <span class="badge badge-warning">Open</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ report.submitted_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'report_analysis' report.id %}" class="btn btn-primary btn-sm">Analysis</a>
+                            {% if not report.is_resolved %}
+                            <button onclick="updateStatus({{ report.id }}, 'resolve')" class="btn btn-success btn-sm">Resolve</button>
+                            {% else %}
+                            <button onclick="updateStatus({{ report.id }}, 'reopen')" class="btn btn-warning btn-sm">Reopen</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+   
+                <div class="pagination pagination-sm" id="pagination-controls"></div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Pagination & Interactivity Scripts -->
+<script>
+    // Sidebar Toggle
+    document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        sidebar.classList.toggle('active');
+        content.classList.toggle('shifted');
+    });
+
+    // Theme Toggle
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        document.body.setAttribute('data-bs-theme',
+            document.body.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // Update Status
+    function updateStatus(reportId, action) {
+        fetch(`/update-report-status/${reportId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `action=${action}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+
+    // Client-side Pagination
+    document.addEventListener("DOMContentLoaded", function () {
+        const rowsPerPage = 10;
+        const tbody = document.getElementById("report-body");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const paginationControls = document.getElementById("pagination-controls");
+
+        function displayRows(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? "" : "none";
+            });
+        }
+
+        function setupPagination() {
+            const totalPages = Math.ceil(rows.length / rowsPerPage);
+            paginationControls.innerHTML = "";
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement("li");
+                li.classList.add("page-item");
+                if (i === 1) li.classList.add("active");
+
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.querySelectorAll(".page-item").forEach(p => p.classList.remove("active"));
+                    li.classList.add("active");
+                    displayRows(i);
+                });
+
+                paginationControls.appendChild(li);
+            }
+
+            displayRows(1); // Initial display
+        }
+
+        if (rows.length > rowsPerPage) {
+            setupPagination();
+        }
+    });
+</script>
+
+  
+
+    
+</body>
+</html>

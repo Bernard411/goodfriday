@@ -1,0 +1,618 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybercrime Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        @font-face {
+            font-family: 'Troy';
+            src: url('{% static 'troy.woff2' %}') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar .nav-link {
+            color: #202124;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: #f1f3f4;
+            color: #1a73e8;
+        }
+
+        .sidebar .material-icons {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .content {
+            transition: margin-left 0.3s ease;
+        }
+
+        .content.shifted {
+            margin-left: 250px;
+        }
+
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand img {
+            max-height: 32px;
+        }
+
+        .navbar-brand span {
+            font-size: 1.1rem;
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            color: #1a73e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table th {
+            background-color: #f1f3f4;
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+
+        .btn-primary:hover {
+            background-color: #1557b0;
+            border-color: #1557b0;
+        }
+
+        .btn-success {
+            background-color: #34a853;
+            border-color: #34a853;
+        }
+
+        .btn-success:hover {
+            background-color: #2c8b47;
+            border-color: #2c8b47;
+        }
+
+        .btn-warning {
+            background-color: #fbbc05;
+            border-color: #fbbc05;
+            color: #202124;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #e0a800;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+
+        .badge-success {
+            background-color: #34a853;
+        }
+
+        .badge-warning {
+            background-color: #fbbc05;
+            color: #202124;
+        }
+
+        @media (max-width: 576px) {
+            .table-responsive {
+                font-size: 0.75rem;
+            }
+            .btn-sm {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.7rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .navbar-brand span {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar {
+                left: 0;
+            }
+            .content {
+                margin-left: 250px;
+            }
+            .navbar .btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="p-3">
+        <!-- <div class="d-flex align-items-center mb-3">
+           
+            <span style="font-size: 1.1rem; font-weight: 500; color: #202124;">Malawi Cybercrime</span>
+        </div> -->
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="{% url 'dashboard' %}"><i class="material-icons">dashboard</i> Dashboard</a>
+            <a class="nav-link" href="{% url 'report_cybercrime' %}"><i class="material-icons">report</i> Report Cybercrime</a>
+         
+            <a class="nav-link" href="{% url 'statistics' %}"><i class="material-icons">bar_chart</i> Statistics</a>
+            <a class="nav-link" href="{% url 'report_analysis' 0 %}"><i class="material-icons">analytics</i> Report Analysis</a>
+            <a class="nav-link" href="{% url 'export_all_data' %}"><i class="material-icons">file_download</i> Export All Reports</a>
+            <a class="nav-link" href="{% url 'logout' %}"><i class="material-icons">logout</i> Logout</a>
+        </nav>
+    </div>
+    <div class="text-center p-3" style="font-size: 0.85rem; color: #888; border-top: 1px solid #eee;">
+        &copy; {{ year|default:"2024" }} Malawi Cybercrime System
+    </div>
+</div>
+
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <button class="btn" id="sidebar-toggle">
+                <i class="material-icons">menu</i>
+            </button>
+            <!-- <a class="navbar-brand" href="#">
+                <img src="{% static 'mw.png' %}" alt="Logo">
+                <span>Malawi Cybercrime System</span>
+            </a> -->
+            <div class="ms-auto d-flex align-items-center">
+                <button class="btn" id="theme-toggle">
+                    <i class="material-icons">dark_mode</i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-3 content" id="content">
+        <img src="{% static 'mw.png' %}" alt="Logo" style="max-height: 32px; vertical-align: middle;">
+        <i class="material-icons" style="vertical-align: middle; color: #1a73e8; font-size: 1.6rem;">security</i>
+        <span style="font-weight: 500; color: #202124; font-size: 1.3rem; vertical-align: middle; margin-left: 10px;">Malawi Cybercrime Reporting System</span>
+
+
+
+        <!-- Statistics Cards -->
+        <!-- <div class="stats-grid">
+            {% for stat in priority_stats %}
+            <div class="stat-card">
+                <i class="material-icons stat-icon">priority_high</i>
+                <div class="stat-title">{{ stat.priority_level|title }}</div>
+                <div class="stat-value">{{ stat.count }}</div>
+                <div style="font-size: 0.85rem; color: #5f6368;">Reports</div>
+            </div>
+            {% endfor %}
+        </div> -->
+
+        <!-- Reports Table -->
+   
+<div class="container-fluid mt-4">
+    <h2>Statistics and Trends</h2>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        {% for priority in priority_distribution %}
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ priority.priority_level|title }}</h5>
+                    <h2>{{ priority.count }}</h2>
+                    <p class="text-muted">Total Reports</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Charts Section -->
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <!-- Monthly Trends Chart -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Monthly Report Trends</h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="monthlyTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Crime Distribution Chart -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Crime Type Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="crimeDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Crime Statistics -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Detailed Crime Type Analysis</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Crime Type</th>
+                            <th>Total Reports</th>
+                            <th>Percentage</th>
+                            <th>Avg. Priority Score</th>
+                            <th>Distribution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for crime in crime_distribution %}
+                        <tr>
+                            <td>{{ crime.display_name }}</td>
+                            <td>{{ crime.count }}</td>
+                            <td>{{ crime.percentage|floatformat:1 }}%</td>
+                            <td>{{ crime.avg_priority|floatformat:1 }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {{ crime.percentage }}%; background-color: {{ crime.color|default:'#1a73e8' }}">
+                                        {{ crime.percentage|floatformat:1 }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crime Type Analysis -->
+    <!-- <div class="card">
+        <div class="card-header">
+            <h5>Crime Type Analysis</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Crime Type</th>
+                            <th>Total Reports</th>
+                            <th>Average Priority Score</th>
+                            <th>Distribution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for crime in crime_distribution %}
+                        <tr>
+                            <td>{{ crime.display_name }}</td>
+                            <td>{{ crime.count }}</td>
+                            <td>{{ crime.avg_priority|floatformat:1 }}</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {{ crime.percentage }}%">
+                                        {{ crime.percentage|floatformat }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Trends Chart
+    const monthlyData = {{ monthly_stats|safe }};
+    const dates = monthlyData.map(item => item.submitted_at__date);
+    const counts = monthlyData.map(item => item.count);
+    const avgPriorities = monthlyData.map(item => item.avg_priority);
+
+    const monthlyChart = new Chart(document.getElementById('monthlyTrendsChart'), {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Number of Reports',
+                data: counts,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }, {
+                label: 'Average Priority Score',
+                data: avgPriorities,
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1,
+                fill: false,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Number of Reports'
+                    },
+                    beginAtZero: true
+                },
+                y1: {
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Average Priority Score'
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Crime Distribution Chart
+    const crimeData = {{ crime_distribution|safe }};
+    const crimeChart = new Chart(document.getElementById('crimeDistributionChart'), {
+        type: 'pie',
+        data: {
+            labels: crimeData.map(item => item.display_name),
+            datasets: [{
+                data: crimeData.map(item => item.count),
+                backgroundColor: [
+                    'rgb(255, 99, 132)',   // Red
+                    'rgb(54, 162, 235)',   // Blue
+                    'rgb(255, 206, 86)',   // Yellow
+                    'rgb(75, 192, 192)',   // Teal
+                    'rgb(153, 102, 255)',  // Purple
+                    'rgb(255, 159, 64)',   // Orange
+                    'rgb(46, 204, 113)',   // Green
+                    'rgb(142, 68, 173)'    // Dark Purple
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: true,
+                    text: 'Crime Type Distribution'
+                }
+            }
+        }
+    });
+});
+</script>
+
+
+<!-- Pagination & Interactivity Scripts -->
+<script>
+    // Sidebar Toggle
+    document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        sidebar.classList.toggle('active');
+        content.classList.toggle('shifted');
+    });
+
+    // Theme Toggle
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        document.body.setAttribute('data-bs-theme',
+            document.body.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // Update Status
+    function updateStatus(reportId, action) {
+        fetch(`/update-report-status/${reportId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `action=${action}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+
+    // Client-side Pagination
+    document.addEventListener("DOMContentLoaded", function () {
+        const rowsPerPage = 10;
+        const tbody = document.getElementById("report-body");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const paginationControls = document.getElementById("pagination-controls");
+
+        function displayRows(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? "" : "none";
+            });
+        }
+
+        function setupPagination() {
+            const totalPages = Math.ceil(rows.length / rowsPerPage);
+            paginationControls.innerHTML = "";
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement("li");
+                li.classList.add("page-item");
+                if (i === 1) li.classList.add("active");
+
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.querySelectorAll(".page-item").forEach(p => p.classList.remove("active"));
+                    li.classList.add("active");
+                    displayRows(i);
+                });
+
+                paginationControls.appendChild(li);
+            }
+
+            displayRows(1); // Initial display
+        }
+
+        if (rows.length > rowsPerPage) {
+            setupPagination();
+        }
+    });
+</script>
+
+  
+
+    
+</body>
+</html>

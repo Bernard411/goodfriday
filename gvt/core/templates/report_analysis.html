@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Malawi Cybersecurity</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             /* Light mode variables */
@@ -414,6 +418,18 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
+        }
+
+        #incident-map {
+            height: 300px;
+            width: 100%;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .location-info {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
         }
 
         @media (max-width: 768px) {
@@ -970,6 +986,117 @@
 
                     <div class="section">
                         <div class="section-header">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Incident Location
+                        </div>
+                        <div id="incident-map" style="height: 400px; width: 100%; border-radius: 4px; margin-bottom: 20px;"></div>
+                        <div class="location-info">
+                            {% if report.latitude and report.longitude %}
+                                <p><i class="fas fa-map-marker-alt"></i> Location: {{ report.latitude }}, {{ report.longitude }}</p>
+                            {% else %}
+                                <p class="text-muted"><i class="fas fa-info-circle"></i> No location data available for this report.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                
+                    <!-- JavaScript for Filtering (updated to include priority) -->
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const filterId = document.getElementById("filter-id");
+                        const filterCrimeType = document.getElementById("filter-crime-type");
+                        const filterStatus = document.getElementById("filter-status");
+                        const filterIncidentDate = document.getElementById("filter-incident-date");
+                        const filterReporter = document.getElementById("filter-reporter");
+                        const filterSubmittedAt = document.getElementById("filter-submitted-at");
+                        const table = document.getElementById("reports-table");
+                        const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                
+                        function applyFilters() {
+                            const idValue = filterId.value.trim().toLowerCase().replace("#", "");
+                            const crimeTypeValue = filterCrimeType.value.trim().toLowerCase();
+                            const statusValue = filterStatus.value.trim().toLowerCase();
+                            const incidentDateValue = filterIncidentDate.value.trim().toLowerCase();
+                            const reporterValue = filterReporter.value.trim().toLowerCase();
+                            const submittedAtValue = filterSubmittedAt.value.trim().toLowerCase();
+                
+                            Array.from(rows).forEach(row => {
+                                const id = row.cells[0].textContent.toLowerCase().replace("#", "");
+                                const crimeType = row.cells[1].textContent.toLowerCase();
+                                const status = row.cells[2].textContent.toLowerCase();
+                                const incidentDate = row.cells[3].textContent.toLowerCase();
+                                const reporter = row.cells[4].textContent.toLowerCase();
+                                const submittedAt = row.cells[5].textContent.toLowerCase();
+                
+                                const matchesId = !idValue || id.includes(idValue);
+                                const matchesCrimeType = !crimeTypeValue || crimeType.includes(crimeTypeValue);
+                                const matchesStatus = !statusValue || status.includes(statusValue);
+                                const matchesIncidentDate = !incidentDateValue || incidentDate.includes(incidentDateValue);
+                                const matchesReporter = !reporterValue || reporter.includes(reporterValue);
+                                const matchesSubmittedAt = !submittedAtValue || submittedAt.includes(submittedAtValue);
+                
+                                if (matchesId && matchesCrimeType && matchesStatus && matchesIncidentDate && matchesReporter && matchesSubmittedAt) {
+                                    row.style.display = "";
+                                } else {
+                                    row.style.display = "none";
+                                }
+                            });
+                        }
+                
+                        filterId.addEventListener("input", applyFilters);
+                        filterCrimeType.addEventListener("change", applyFilters);
+                        filterStatus.addEventListener("change", applyFilters);
+                        filterIncidentDate.addEventListener("input", applyFilters);
+                        filterReporter.addEventListener("input", applyFilters);
+                        filterSubmittedAt.addEventListener("input", applyFilters);
+                
+                        // Modal map initialization (unchanged)
+                        {% for report in reports %}
+                            var modal{{ report.id }} = document.getElementById("locationModal{{ report.id }}");
+                            modal{{ report.id }}.addEventListener("shown.bs.modal", function () {
+                                var mapContainer = document.getElementById("map{{ report.id }}");
+                                if (!mapContainer.hasAttribute("data-map-initialized")) {
+                                    var map = L.map("map{{ report.id }}").setView([-13.9626, 33.7741], 13);
+                                    L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+                                        attribution: "© <a href='https://www.google.com/maps'>Google Maps</a>",
+                                    }).addTo(map);
+                                    var drawnFeatures = new L.FeatureGroup();
+                                    map.addLayer(drawnFeatures);
+                                    var drawControl = new L.Control.Draw({
+                                        edit: { featureGroup: drawnFeatures, remove: false },
+                                        draw: {
+                                            polygon: { shapeOptions: { color: 'purple' } },
+                                            polyline: { shapeOptions: { color: 'red' } },
+                                            rect: { shapeOptions: { color: 'green' } },
+                                            circle: { shapeOptions: { color: 'steelblue' } },
+                                        }
+                                    });
+                                    map.addControl(drawControl);
+                                    map.on("draw:created", function(e) {
+                                        var layer = e.layer;
+                                        console.log(layer.toGeoJSON());
+                                        layer.bindPopup(`<p>${JSON.stringify(layer.toGeoJSON())}</p>`);
+                                        drawnFeatures.addLayer(layer);
+                                    });
+                                    map.on("draw:edited", function(e) {
+                                        var layers = e.layers;
+                                        layers.eachLayer(function(layer) {
+                                            console.log(layer);
+                                        });
+                                    });
+                                    if ({{ report.latitude|default:"null" }} !== null && {{ report.longitude|default:"null" }} !== null) {
+                                        L.marker([{{ report.latitude }}, {{ report.longitude }}]).addTo(map)
+                                            .bindPopup("Reported Location")
+                                            .openPopup();
+                                    }
+                                    mapContainer.setAttribute("data-map-initialized", "true");
+                                }
+                            });
+                        {% endfor %}
+                    });
+                    </script>
+               
+                    <div class="section">
+                        <div class="section-header">
                             <i class="fas fa-paperclip"></i>
                             Evidence Files
                         </div>
@@ -1095,6 +1222,42 @@
                 sidebar.classList.toggle('active');
             });
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Default coordinates for Malawi
+            var defaultLat = -13.9626;
+            var defaultLng = 33.7741;
+            
+            // Get coordinates from the report or use defaults
+            var lat = {% if report.latitude %}{{ report.latitude }}{% else %}defaultLat{% endif %};
+            var lng = {% if report.longitude %}{{ report.longitude }}{% else %}defaultLng{% endif %};
+            
+            // Initialize the map
+            var map = L.map('incident-map').setView([lat, lng], lat === defaultLat ? 6 : 13);
+            
+            // Add the OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            {% if report.latitude and report.longitude %}
+                // Add a marker for the incident location
+                var marker = L.marker([{{ report.latitude }}, {{ report.longitude }}])
+                    .addTo(map)
+                    .bindPopup(
+                        '<strong>Incident Location</strong><br>' +
+                        'Type: {{ report.get_crime_type_display }}<br>' +
+                        'Date: {{ report.incident_date|date:"F j, Y" }}'
+                    ).openPopup();
+            {% endif %}
+            
+            // Force a refresh of the map after it's visible
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
+        });
     </script>
 </body>
 </html>

@@ -50,13 +50,13 @@ def report_cybercrime(request):
             report.ip_address = request.META.get('REMOTE_ADDR', '')
             report.save()
             
-            # Calculate priority score
-            report.calculate_priority_score()
-            
-            # Handle evidence files
+            # Handle evidence files first
             files = request.FILES.getlist('evidence_files')
             for file in files:
                 EvidenceFile.objects.create(report=report, file=file)
+            
+            # Calculate priority score after evidence files are saved
+            report.calculate_priority_score()
             
             # Redirect to success page with report ID
             return redirect('success', report_id=report.id)
@@ -375,3 +375,166 @@ def export_all_data_to_excel(request):
     response['Content-Disposition'] = 'attachment; filename="Cybercrime_Data.xlsx"'
     
     return response
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Avg
+from django.utils import timezone
+from datetime import timedelta
+import json
+from django.http import JsonResponse
+
+@login_required
+def priority_dashboard(request):
+    """Dashboard showing reports categorized by priority levels"""
+    priority_filter = request.GET.get('priority', '')
+    date_filter = request.GET.get('date_range', '')
+    
+    reports = CybercrimeReport.objects.all()
+    
+    # Apply filters
+    if priority_filter:
+        reports = reports.filter(priority_level=priority_filter)
+        
+    if date_filter:
+        if date_filter == 'today':
+            reports = reports.filter(submitted_at__date=timezone.now().date())
+        elif date_filter == 'week':
+            one_week_ago = timezone.now() - timedelta(days=7)
+            reports = reports.filter(submitted_at__gte=one_week_ago)
+        elif date_filter == 'month':
+            one_month_ago = timezone.now() - timedelta(days=30)
+            reports = reports.filter(submitted_at__gte=one_month_ago)
+    
+    # Get statistics
+    priority_stats = reports.values('priority_level').annotate(count=Count('id'))
+    crime_type_stats = reports.values('crime_type').annotate(count=Count('id'))
+    
+    context = {
+        'reports': reports.order_by('-priority_score', '-submitted_at'),
+        'priority_stats': priority_stats,
+        'crime_type_stats': crime_type_stats,
+        'selected_priority': priority_filter,
+        'selected_date_range': date_filter,
+    }
+    return render(request, 'priority_dashboard.html', context)
+
+@login_required
+def report_analysis(request, report_id):
+    """Detailed AI analysis view for a specific report"""
+    report = get_object_or_404(CybercrimeReport, id=report_id)
+    
+    # Get similar cases
+    similar_reports = CybercrimeReport.objects.filter(
+        crime_type=report.crime_type
+    ).exclude(id=report.id).order_by('-priority_score')[:5]
+    
+    # Calculate trend data
+    trend_data = CybercrimeReport.objects.filter(
+        crime_type=report.crime_type,
+        submitted_at__gte=timezone.now() - timedelta(days=30)
+    ).values('submitted_at__date').annotate(
+        count=Count('id'),
+        avg_priority=Avg('priority_score')
+    ).order_by('submitted_at__date')
+    
+    context = {
+        'report': report,
+        'similar_reports': similar_reports,
+        'trend_data': list(trend_data),
+        'ai_analysis': report.ai_analysis,
+    }
+    return render(request, 'report_analysis.html', context)
+
+@login_required
+def update_report_status(request, report_id):
+    """Update report resolution status"""
+    if request.method == 'POST':
+        report = get_object_or_404(CybercrimeReport, id=report_id)
+        action = request.POST.get('action')
+        
+        if action == 'resolve':
+            report.is_resolved = True
+            report.resolution_date = timezone.now()
+        elif action == 'reopen':
+            report.is_resolved = False
+            report.resolution_date = None
+            
+        report.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def statistics_view(request):
+    """View for showing overall statistics and trends"""
+    # Time-based statistics
+    now = timezone.now()
+    last_month = now - timedelta(days=30)
+    
+    # Format dates for chart display
+    monthly_stats = (
+        CybercrimeReport.objects
+        .filter(submitted_at__gte=last_month)
+        .values('submitted_at__date')
+        .annotate(
+            count=Count('id'),
+            avg_priority=Avg('priority_score')
+        )
+        .order_by('submitted_at__date')
+    )
+    
+    # Convert dates to string format for JSON
+    monthly_stats_list = [
+        {
+            'submitted_at__date': item['submitted_at__date'].strftime('%Y-%m-%d'),
+            'count': item['count'],
+            'avg_priority': float(item['avg_priority']) if item['avg_priority'] else 0
+        }
+        for item in monthly_stats
+    ]
+    
+    # Crime type distribution with proper display names
+    crime_distribution = list(
+        CybercrimeReport.objects
+        .values('crime_type')
+        .annotate(
+            count=Count('id'),
+            avg_priority=Avg('priority_score')
+        )
+    )
+    
+    # Add display names, percentages and colors to crime distribution
+    crime_type_dict = dict(CRIME_TYPES)
+    total_reports = sum(item['count'] for item in crime_distribution)
+    colors = [
+        '#1a73e8',  # Blue
+        '#ea4335',  # Red
+        '#34a853',  # Green
+        '#fbbc04',  # Yellow
+        '#9334e8',  # Purple
+        '#ff6d01',  # Orange
+        '#46bdc6',  # Teal
+        '#7c4dff'   # Indigo
+    ]
+    
+    for i, item in enumerate(crime_distribution):
+        item['display_name'] = crime_type_dict.get(item['crime_type'], item['crime_type'])
+        item['avg_priority'] = float(item['avg_priority']) if item['avg_priority'] else 0
+        item['percentage'] = (item['count'] / total_reports * 100) if total_reports > 0 else 0
+        item['color'] = colors[i % len(colors)]
+    
+    # Priority level distribution
+    priority_distribution = (
+        CybercrimeReport.objects
+        .values('priority_level')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    
+    context = {
+        'monthly_stats': monthly_stats_list,
+        'crime_distribution': crime_distribution,
+        'priority_distribution': priority_distribution,
+        'total_reports': CybercrimeReport.objects.count(),
+    }
+    return render(request, 'statistics.html', context)
