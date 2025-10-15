@@ -81,7 +81,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+# Base URL for the site (used for QR codes, etc.)
+SITE_URL = 'http://127.0.0.1:8000'  # Use your production URL in production
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

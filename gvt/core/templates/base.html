@@ -1,0 +1,529 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Malawi Cybersecurity{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+    <style>
+        :root {
+            --primary: #0a0f2d;
+            --secondary: #1a1f3c;
+            --accent: #00f5ff;
+            --accent-glow: rgba(0, 245, 255, 0.3);
+            --danger: #ff375f;
+            --warning: #ffaa00;
+            --success: #00d4aa;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a8c9;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 245, 255, 0.1);
+            --emergency-bg: #ff375f;
+            --emergency-text: #ffffff;
+            --footer-bg: #1a1f3c;
+            --footer-text: #a0a8c9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, #000000 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-size: 0.85rem;
+        }
+
+        /* Cyber Grid Background */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, var(--primary) 18px, transparent 1%) center,
+                linear-gradient(var(--primary) 18px, transparent 1%) center,
+                var(--accent);
+            background-size: 19px 19px;
+            opacity: 0.03;
+            z-index: -1;
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            filter: blur(50px);
+            opacity: 0.1;
+            z-index: -1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) { top: 10%; left: 10%; }
+        .floating-element:nth-child(2) { top: 60%; right: 10%; background: var(--danger); animation-delay: -2s; }
+        .floating-element:nth-child(3) { bottom: 20%; left: 20%; background: var(--success); animation-delay: -4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(180deg); }
+        }
+
+        /* Emergency Bar */
+        .emergency-bar {
+            background: var(--emergency-bg);
+            color: var(--emergency-text);
+            padding: 0.6rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .emergency-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .emergency-contact {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .emergency-contact a {
+            color: var(--emergency-text);
+            text-decoration: none;
+        }
+
+        .emergency-contact a:hover {
+            text-decoration: underline;
+        }
+
+        .emergency-info {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hotline {
+            font-weight: 600;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Modern Header */
+        .modern-header {
+            background: rgba(10, 15, 45, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-glow);
+            padding: 0.8rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .logo-glow {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .logo-glow img {
+            width: 48px;
+        }
+
+        .agency-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .security-badge {
+            background: linear-gradient(135deg, var(--danger) 0%, #ff6b9c 100%);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(255, 55, 95, 0.3);
+        }
+
+        .login-btn {
+            background: var(--accent);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .login-btn:hover {
+            background: var(--accent-glow);
+            transform: translateY(-1px);
+            color: var(--primary);
+        }
+
+        /* Page Title */
+        .page-title {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-glow);
+            padding: 1.5rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Glass Morphism Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-glow);
+            border-radius: 15px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.1);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 2rem 0 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .footer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-link {
+            color: var(--footer-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--accent);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--footer-text);
+        }
+
+        .footer-divider {
+            border-top: 1px solid var(--border-glow);
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+        }
+
+        .copyright {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--footer-text);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .header-container {
+                flex-direction: row;
+            }
+
+            .logo-section {
+                margin-bottom: 0;
+            }
+
+            .navigation {
+                flex-direction: row;
+                gap: 1.5rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .emergency-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .emergency-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .support-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cyber Grid Background -->
+    <div class="cyber-grid"></div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <!-- Top Emergency Bar -->
+    <div class="emergency-bar">
+        <div class="emergency-container">
+            <div class="emergency-contact hotline">
+                <i class="fas fa-phone-alt animate-pulse"></i>
+                <span>Emergency Hotline:</span>
+                <a href="tel:+26598877272">+265 98877272</a>
+            </div>
+            <div class="emergency-info">
+                <div class="emergency-contact">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:report@malawicyber.gov.mw">report@malawicyber.gov.mw</a>
+                </div>
+                <div class="emergency-contact support-info">
+                    <i class="fas fa-clock"></i>
+                    <span>24/7 Support Available</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Header -->
+    <header class="modern-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo-glow">
+                    <img src="{% static 'mw.png' %}" alt="Malawi Cybersecurity Logo">
+                </div>
+                <div class="site-title">
+                    <h1 class="agency-title">Malawi Cybersecurity</h1>
+                    <p class="text-secondary mb-0" style="font-size: 0.75rem;">
+                        {% block header_subtitle %}{% endblock %}
+                    </p>
+                </div>
+            </div>
+            <div class="navigation">
+                <div class="nav-links">
+                    <a href="{% url 'dashboard' %}" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="#info" class="nav-link">
+                        <i class="fas fa-question-circle"></i> Help
+                    </a>
+                    {% block extra_nav_links %}{% endblock %}
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="security-badge">
+                        <i class='bx bx-check-shield'></i> TS/SCI CLEARED
+                    </span>
+                    <div class="text-end">
+                        <div class="text-secondary" style="font-size: 0.7rem;">Operator</div>
+                        <div class="fw-bold" style="font-size: 0.8rem;">{{ request.user.username }}</div>
+                    </div>
+                    <a href="{% url 'logout' %}" class="login-btn">
+                        <i class='bx bx-power-off'></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Title -->
+    <div class="page-title">
+        <div class="container">
+            {% block page_title %}
+            <h2><i class="fas fa-tachometer-alt"></i> {% block page_title_text %}{% endblock %}</h2>
+            <p>{% block page_subtitle %}{% endblock %}</p>
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container py-3">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer id="info">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>About MCSIRT</h4>
+                    <p style="font-size: 0.75rem;">
+                        Malawi Computer Security Incident Response Team (MCSIRT) coordinates cybersecurity incident response across Malawi.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-list">
+                        <li><a href="#" class="footer-link"><i class="fas fa-angle-right"></i> Security Advisories</a></li>
+                        <li><a href="#" class="footer-link"><i class="fas fa-angle-right"></i> Best Practices</a></li>
+                        <li><a href="#" class="footer-link"><i class="fas fa-angle-right"></i> Training Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Us</h4>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Capital City, Lilongwe, Malawi</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+265 1 773 799</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@malawicyber.gov.mw</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-divider">
+                <div class="copyright">
+                    © 2025 Malawi Cybersecurity Authority. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

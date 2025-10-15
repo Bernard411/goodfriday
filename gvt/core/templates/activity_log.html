@@ -2,12 +2,12 @@
 {% load static %}
 {% load activity_filters %}
 
-{% block title %}Malawi Cybersecurity • Priority Dashboard{% endblock %}
+{% block title %}Malawi Cybersecurity • Activity Log{% endblock %}
 
-{% block header_subtitle %}Priority Dashboard{% endblock %}
+{% block header_subtitle %}Activity Log{% endblock %}
 
-{% block page_title_text %}Priority Dashboard{% endblock %}
-{% block page_subtitle %}Monitor and manage high-priority cybercrime reports{% endblock %}
+{% block page_title_text %}Activity Log{% endblock %}
+{% block page_subtitle %}View and filter system activity logs{% endblock %}
 
 {% block extra_head %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -80,11 +80,31 @@
             background: rgba(0, 245, 255, 0.05);
         }
 
-        /* Priority Badge */
-        .badge-critical { background: #ff375f; }
-        .badge-high { background: #ffaa00; }
-        .badge-medium { background: #00f5ff; }
-        .badge-low { background: #00d4aa; }
+        /* Pagination */
+        .pagination {
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .pagination .page-link {
+            background: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background: var(--accent);
+            color: var(--primary);
+            border-color: var(--accent);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--primary);
+        }
 
         /* Charts Container */
         .charts-container {
@@ -99,13 +119,13 @@
             border-radius: 12px;
             padding: 1rem;
             border: 1px solid var(--border-glow);
-            max-width: 360px;
-            max-height: 300px;
-            margin: 0 auto;
+            max-width: 460px; /* Reduced max-width for smaller chart */
+            max-height: 400px; /* Added max-height to constrain chart size */
+            margin: 0 auto; /* Center the chart card */
         }
 
         .chart-card canvas {
-            max-height: 120px !important;
+            max-height: 320px !important; /* Ensure canvas doesn't exceed container */
         }
 
         /* Quick Actions Bar */
@@ -148,7 +168,7 @@
             }
 
             .chart-card {
-                max-width: 100%;
+                max-width: 100%; /* Full width on smaller screens */
             }
 
             .quick-actions-bar {
@@ -165,13 +185,16 @@
     <div class="filter-form">
         <form method="GET" class="row g-3">
             <div class="col-md-3">
-                <label for="priority" class="form-label" style="font-size: 0.75rem; color: var(--text-secondary);">Priority Level</label>
-                <select name="priority" id="priority" class="form-control">
-                    <option value="">All Priorities</option>
-                    <option value="Critical" {% if selected_priority == 'Critical' %}selected{% endif %}>Critical</option>
-                    <option value="High" {% if selected_priority == 'High' %}selected{% endif %}>High</option>
-                    <option value="Medium" {% if selected_priority == 'Medium' %}selected{% endif %}>Medium</option>
-                    <option value="Low" {% if selected_priority == 'Low' %}selected{% endif %}>Low</option>
+                <label for="user" class="form-label" style="font-size: 0.75rem; color: var(--text-secondary);">User</label>
+            <input type="text" name="user" id="user" class="form-control" value="{{ selected_user }}" placeholder="Enter username">
+            </div>
+            <div class="col-md-3">
+                <label for="action" class="form-label" style="font-size: 0.75rem; color: var(--text-secondary);">Action Type</label>
+                <select name="action" id="action" class="form-control">
+                    <option value="">All Actions</option>
+                    {% for action, display_name in action_types %}
+                    <option value="{{ action }}" {% if selected_action == action %}selected{% endif %}>{{ display_name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-md-3">
@@ -191,64 +214,71 @@
         </form>
     </div>
 
-    <!-- Charts Container -->
-    <div class="charts-container">
-        <div class="chart-card">
-            <h5 class="mb-2" style="font-size: 0.9rem;">Priority Distribution</h5>
-            <canvas id="priorityChart" height="120"></canvas>
-        </div>
-        <div class="chart-card">
-            <h5 class="mb-2" style="font-size: 0.9rem;">Crime Type Distribution</h5>
-            <canvas id="crimeTypeChart" height="120"></canvas>
-        </div>
-    </div>
-
-    <!-- Reports Table -->
+    <!-- Activity Log Table -->
     <div class="glass-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0" style="font-size: 1rem;">Priority Reports</h4>
-            <a href="{% url 'export_all_data' %}" class="btn btn-primary btn-sm">
-                <i class='bx bx-download'></i> Export Data
-            </a>
+            <h4 class="mb-0" style="font-size: 1rem;">System Activity Log</h4>
         </div>
-        {% if reports %}
+        {% if page_obj %}
         <div class="table-responsive">
             <table class="table modern-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Crime Type</th>
-                        <th>Priority</th>
-                        <th>Score</th>
-                        <th>Submitted</th>
-                        <th>Status</th>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for report in reports %}
+                    {% for activity in page_obj %}
                     <tr>
-                        <td>{{ report.id }}</td>
-                        <td>{{ report.title|truncatechars:30 }}</td>
-                        <td>{{ report.get_crime_type_display|default:report.crime_type }}</td>
-                        <td>
-                            <span class="badge badge-{{ report.priority_level|lower }}">{{ report.priority_level }}</span>
-                        </td>
-                        <td>{{ report.priority_score|floatformat:1 }}</td>
-                        <td>{{ report.submitted_at|date:"M d, Y H:i" }}</td>
-                        <td>{{ report.status }}</td>
+                        <td>{{ activity.timestamp|date:"M d, Y H:i" }}</td>
+                        <td>{{ activity.user.username|default:"System" }}</td>
+                        <td>{{ activity.get_action_display }}</td>
+                        <td>{{ activity.description }}</td>
+                        <td>{{ activity.ip_address|default:"N/A" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_date_range %}&date_range={{ selected_date_range }}{% endif %}">&laquo; Previous</a>
+                </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_date_range %}&date_range={{ selected_date_range }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if selected_date_range %}&date_range={{ selected_date_range }}{% endif %}">Next &raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
         {% else %}
         <div class="text-center py-4">
-            <i class='bx bx-shield-x display-1 text-secondary'></i>
-            <h4 class="mt-2" style="font-size: 1rem;">No Reports Found</h4>
-            <p class="text-secondary" style="font-size: 0.75rem;">No reports match the selected filters</p>
+            <i class='bx bx-history display-1 text-secondary'></i>
+            <h4 class="mt-2" style="font-size: 1rem;">No Activities Found</h4>
+            <p class="text-secondary" style="font-size: 0.75rem;">No activities match the selected filters</p>
         </div>
         {% endif %}
+    </div>
+
+    <!-- Action Distribution Chart -->
+    <div class="charts-container">
+        <div class="chart-card">
+            <h5 class="mb-2" style="font-size: 0.9rem;">Action Type Distribution</h5>
+            <canvas id="actionChart" height="120"></canvas>
+        </div>
     </div>
 
     <!-- Quick Actions Bar -->
@@ -265,55 +295,20 @@
         <a href="{% url 'system_health' %}" class="quick-action">
             <i class='bx bx-heart'></i> System Health
         </a>
-        <a href="{% url 'activity_log' %}" class="quick-action">
-            <i class='bx bx-history'></i> Activity Log
-        </a>
     </div>
 {% endblock %}
 
 {% block extra_scripts %}
     <script>
-        // Initialize Charts
+        // Initialize Action Distribution Chart
         document.addEventListener('DOMContentLoaded', function() {
-            // Priority Distribution Chart
-            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
-            new Chart(priorityCtx, {
-                type: 'bar',
-                data: {
-                    labels: [{% for stat in priority_stats %}'{{ stat.priority_level }}',{% endfor %}],
-                    datasets: [{
-                        data: [{% for stat in priority_stats %}{{ stat.count }},{% endfor %}],
-                        backgroundColor: ['#ff375f', '#ffaa00', '#00f5ff', '#00d4aa'],
-                        borderWidth: 0,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(160, 168, 201, 0.1)' },
-                            ticks: { color: '#a0a8c9', font: { size: 10 } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#a0a8c9', font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-
-            // Crime Type Distribution Chart
-            const crimeTypeCtx = document.getElementById('crimeTypeChart').getContext('2d');
-            new Chart(crimeTypeCtx, {
+            const actionCtx = document.getElementById('actionChart').getContext('2d');
+            new Chart(actionCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: [{% for stat in crime_type_stats %}'{{ stat.crime_type }}',{% endfor %}],
+                    labels: [{% for action, display_name in action_types %}'{{ display_name }}',{% endfor %}],
                     datasets: [{
-                        data: [{% for stat in crime_type_stats %}{{ stat.count }},{% endfor %}],
+                        data: [{% for action, _ in action_types %}{{ action_counts|lookup:action }},{% endfor %}],
                         backgroundColor: [
                             '#00f5ff', '#ff375f', '#ffaa00', '#00d4aa', '#8b5cf6',
                             '#f59e0b', '#ef4444', '#10b981'
@@ -329,7 +324,9 @@
                             labels: {
                                 color: '#a0a8c9',
                                 padding: 15,
-                                font: { size: 10 }
+                                font: {
+                                    size: 10
+                                }
                             }
                         }
                     }
